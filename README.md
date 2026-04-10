@@ -29,6 +29,12 @@ flutter run
 - STAGING: `https://api-stg.example.com`
 - PROD: `https://api.example.com`
 
+## Branching model
+
+This repo follows a `feature → dev → stg → main` promotion flow.
+See [BRANCHING_GUIDE.md](BRANCHING_GUIDE.md) for the full workflow, naming conventions, and PR chain details.
+See [gitworkflow.md](gitworkflow.md) for Git hook setup and commit message rules.
+
 ## Enforced commit message format
 
 This repository blocks commits that do not follow the agreed structure.

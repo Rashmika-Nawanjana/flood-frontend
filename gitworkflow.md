@@ -1,162 +1,112 @@
-Git Workflow for All Contributors
+🚀 Git Workflow for All Contributors
 
 Read this before your first commit.
 
+------------------------------------------------------------------------------------------------------
+
 1️⃣ Run setup before doing anything
+
+Install Git hooks:
+
 bash scripts/setup-git-hooks.sh
 
-This installs the required Git hooks (commit message validator, branch checks, etc.).
-If you skip this, your commits may get rejected.
+These hooks enforce:
+
+Commit message format
+Branch naming rules
+Protected branch restrictions
+
+If you skip this step ⇒ your commits may be rejected.
+
+------------------------------------------------------------------------------------------------------
 
 2️⃣ Protected Branches
 
-The following branches are protected and cannot be pushed to directly:
+The following branches are protected:
 
-main → Production
-stg → Staging
-dev → Development
+| Branch | Purpose    |
+|--------|------------|
+| main   | Production |
+| stg    | Staging    |
+| dev    | Development |
+❌ You must NOT:
+Push directly to these branches
+Commit on these branches
+Merge without a Pull Request
+✔️ You MUST:
+Create a new branch
+Submit a PR into dev
 
-❌ Do NOT work on these branches.
-❌ Do NOT push directly to these branches.
-✔️ Only merge via Pull Requests.
-
-3️⃣ Create a new branch for every task
-
-Use one of these formats:
-
-feature/<short-name> — new featuresGit Workflow for All Contributors
-
-Read this before your first commit.
------------------------------------------------------------------------------------------------------
-
-1️⃣ Run setup before doing anything
-bash scripts/setup-git-hooks.sh
-
-This installs the required Git hooks (commit message validator, branch checks, etc.).
-If you skip this, your commits may get rejected.
-
------------------------------------------------------------------------------------------------------
-
-2️⃣ Protected Branches
-
-The following branches are protected and cannot be pushed to directly:
-
-main → Production
-stg → Staging
-dev → Development
-
-❌ Do NOT work on these branches.
-❌ Do NOT push directly to these branches.
-✔️ Only merge via Pull Requests.
-
------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 3️⃣ Create a new branch for every task
 
-Use one of these formats:
+Use these naming patterns:
 
-feature/<short-name> — new features
-fix/<short-name> — bug fixes
-chore/<short-name> — tooling / configs / docs
-refactor/<short-name> — internal code improvements
-hotfix/<short-name> — urgent production-level fixes
+| Type              | Usage                           |
+|-------------------|---------------------------------|
+| feature/\<name\>  | New features                    |
+| fix/\<name\>      | Bug fixes                       |
+| chore/\<name\>    | Tooling, configs, documentation |
+| refactor/\<name\> | Code cleanup / internal changes |
+| hotfix/\<name\>   | Urgent production fixes         |
 
-Example:
+**Example:**
 
+```bash
 git checkout dev
 git pull
 git checkout -b feature/add-alert-endpoint
+```
 
------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
-4️⃣ Commit message rules
+4️⃣ Commit Message Rules (Enforced by Git Hook)
 
-Every commit must use this format:
+Format:
 
 type(scope optional): short description
-Valid examples
+Valid examples:
 fix: add git hooks and branch protection
 feat(api): add alert endpoint
 chore(ci): add staging pipeline step
 refactor(service): simplify pricing logic
+❌ Invalid messages will be blocked.
 
-If your message does not follow this format,
-❌ the commit will be blocked by the Git hook.
+The hook will reject commits that don’t follow the format.
 
------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
-5️⃣ Submitting your changes (always merge into dev first)
+5️⃣ Submitting Your Changes
 
-All work must go through the pipeline:
+All work goes to dev first.
 
-(feature|fix|chore) → dev → stg → main
-
+Workflow:
+(feature|fix|chore|refactor) → dev → stg → main
 Steps:
-
-Push your branch
+Push your branch:
 git push -u origin feature/add-alert-endpoint
-Open a Pull Request (PR) into dev
-Get reviews + ensure CI checks pass
+Open a Pull Request into dev
+Get a review + pass CI checks
 Merge into dev
-Promotion flow (done by leads/admin):
+Promotion flow (done by leads/admins only)
 dev → stg
 stg → main
 
------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
-6️⃣ Quick command checklist
+6️⃣ Quick Command Checklist
 git checkout dev
 git pull
+
 # make your changes
+
 git checkout -b feature/my-task
 git add .
 git commit -m "feat: short message"
 git push -u origin feature/my-task
-fix/<short-name> — bug fixes
-chore/<short-name> — tooling / configs / docs
-refactor/<short-name> — internal code improvements
-hotfix/<short-name> — urgent production-level fixes
-
-Example:
-
-git checkout dev
-git pull
-git checkout -b feature/add-alert-endpoint
-4️⃣ Commit message rules
-
-Every commit must use this format:
-
-type(scope optional): short description
-Valid examples
-fix: add git hooks and branch protection
-feat(api): add alert endpoint
-chore(ci): add staging pipeline step
-refactor(service): simplify pricing logic
-
-If your message does not follow this format,
-❌ the commit will be blocked by the Git hook.
-
-5️⃣ Submitting your changes (always merge into dev first)
-
-All work must go through the pipeline:
-
-(feature|fix|chore) → dev → stg → main
-
-Steps:
-
-Push your branch
-git push -u origin feature/add-alert-endpoint
-Open a Pull Request (PR) into dev
-Get reviews + ensure CI checks pass
-Merge into dev
-Promotion flow (done by leads/admin):
-dev → stg
-stg → main
-6️⃣ Quick command checklist
-git checkout dev
-git pull
-# make your changes
-git checkout -b feature/my-task
-git add .
-git commit -m "feat: short message"
-git push -u origin feature/my-task
+✅ Final Notes
+Always keep dev updated before creating new branches.
+Never merge without a PR.
+Never commit directly to protected branches.
+Commit messages MUST follow the enforced format.
