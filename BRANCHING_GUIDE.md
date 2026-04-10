@@ -1,6 +1,6 @@
 # Branching Guide
 
-This document describes the Git branching model for this repository.
+This document describes the Git branching model for this repository and provides one-time alignment steps to synchronise all long-lived branches.
 
 ## Branch Structure
 
@@ -84,3 +84,51 @@ git push -u origin feature/my-task
 
 See `gitworkflow.md` for the full workflow including commit message rules and
 Git hook setup.
+
+---
+
+## One-Time Branch Alignment (Post-PR Steps)
+
+After the PR `copilot/align-branches-to-fix-gitworkflow` is merged into `main`,
+run these steps to propagate the same content to `stg` and `dev`.
+
+### Step 1 – Merge `main` into `stg`
+
+On GitHub, open a pull request:
+
+- **base**: `stg`
+- **compare**: `main`
+
+Title: `chore: align stg with main (branch sync)`
+
+Merge it. `stg` will now have the same content as `main`.
+
+### Step 2 – Merge `stg` into `dev`
+
+Open another pull request:
+
+- **base**: `dev`
+- **compare**: `stg`
+
+Title: `chore: align dev with stg (branch sync)`
+
+Merge it. `dev` will now have the same content as `main` and `stg`.
+
+> **Note**: If `dev` already has commits ahead of `stg`, this merge may be a no-op
+> for those files. Resolve any conflicts by keeping the `dev` version of those files.
+
+### Step 3 – Delete `fix/gitworkflow`
+
+After all merges are complete and no open PRs depend on `fix/gitworkflow`:
+
+```bash
+# Via GitHub CLI
+gh api -X DELETE repos/Rashmika-Nawanjana/flood-frontend/git/refs/heads/fix%2Fgitworkflow
+
+# Or via GitHub web UI:
+# 1. Go to https://github.com/Rashmika-Nawanjana/flood-frontend/branches
+# 2. Find fix/gitworkflow in the list
+# 3. Click the trash icon to delete it
+```
+
+---
