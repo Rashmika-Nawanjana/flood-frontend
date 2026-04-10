@@ -52,9 +52,12 @@ Use these naming patterns:
 | hotfix/\<name\>   | Urgent production fixes         |
 
 **Example:**
+
+```bash
 git checkout dev
 git pull
 git checkout -b feature/add-alert-endpoint
+```
 
 ------------------------------------------------------------------------------------------------------
 

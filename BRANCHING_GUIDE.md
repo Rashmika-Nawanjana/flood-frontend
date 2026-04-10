@@ -126,7 +126,7 @@ After all merges are complete and no open PRs depend on `fix/gitworkflow`:
 gh api -X DELETE repos/YOUR_ORG/YOUR_REPO/git/refs/heads/fix%2Fgitworkflow
 
 # Or via GitHub web UI:
-# 1. Go to https://github.com/Rashmika-Nawanjana/flood-frontend/branches
+# 1. Go to https://github.com/YOUR_ORG/YOUR_REPO/branches
 # 2. Find fix/gitworkflow in the list
 # 3. Click the trash icon to delete it
 ```
