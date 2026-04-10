@@ -24,10 +24,11 @@ If you skip this step ⇒ your commits may be rejected.
 
 The following branches are protected:
 
-Branch	Purpose
-main	Production
-stg	Staging
-dev	Development
+| Branch | Purpose    |
+|--------|------------|
+| main   | Production |
+| stg    | Staging    |
+| dev    | Development |
 ❌ You must NOT:
 Push directly to these branches
 Commit on these branches
@@ -42,13 +43,15 @@ Submit a PR into dev
 
 Use these naming patterns:
 
-Type	Usage
-feature/<name>	New features
-fix/<name>	Bug fixes
-chore/<name>	Tooling, configs, documentation
-refactor/<name>	Code cleanup / internal changes
-hotfix/<name>	Urgent production fixes
-Example
+| Type              | Usage                           |
+|-------------------|---------------------------------|
+| feature/\<name\>  | New features                    |
+| fix/\<name\>      | Bug fixes                       |
+| chore/\<name\>    | Tooling, configs, documentation |
+| refactor/\<name\> | Code cleanup / internal changes |
+| hotfix/\<name\>   | Urgent production fixes         |
+
+**Example:**
 git checkout dev
 git pull
 git checkout -b feature/add-alert-endpoint

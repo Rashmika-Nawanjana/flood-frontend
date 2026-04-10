@@ -123,7 +123,7 @@ After all merges are complete and no open PRs depend on `fix/gitworkflow`:
 
 ```bash
 # Via GitHub CLI
-gh api -X DELETE repos/Rashmika-Nawanjana/flood-frontend/git/refs/heads/fix%2Fgitworkflow
+gh api -X DELETE repos/YOUR_ORG/YOUR_REPO/git/refs/heads/fix%2Fgitworkflow
 
 # Or via GitHub web UI:
 # 1. Go to https://github.com/Rashmika-Nawanjana/flood-frontend/branches
