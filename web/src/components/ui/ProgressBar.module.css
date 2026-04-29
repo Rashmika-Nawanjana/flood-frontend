@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.track {
+  flex: 1;
+  background-color: var(--bg-surface-high);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  border-radius: var(--radius-pill);
+  transition: width var(--transition-normal);
+}
+
+.label {
+  font-family: var(--font-jetbrains-mono);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+}

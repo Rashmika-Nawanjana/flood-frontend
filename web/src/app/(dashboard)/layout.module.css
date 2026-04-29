@@ -1,0 +1,8 @@
+.main {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--topbar-height);
+  min-height: calc(100vh - var(--topbar-height) - var(--footer-height));
+  padding: 32px;
+  padding-bottom: calc(var(--footer-height) + 32px);
+  background-color: var(--bg-base);
+}
