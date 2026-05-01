@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "safe-1",
+        "name": "Colombo Stadium Evac Point",
+        "province": "Western",
+        "capacity": 1200,
+        "radius_m": 500,
+        "path": [
+          [79.8612, 6.9271], [79.8630, 6.9300], [79.8655, 6.9340]
+        ]
+      },
+      "geometry": { "type": "Point", "coordinates": [79.8612, 6.9271] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "safe-2",
+        "name": "Galle Sports Complex",
+        "province": "Southern",
+        "capacity": 800,
+        "radius_m": 400,
+        "path": [
+          [80.2186, 6.0323], [80.2205, 6.0350], [80.2240, 6.0390]
+        ]
+      },
+      "geometry": { "type": "Point", "coordinates": [80.2186, 6.0323] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "safe-3",
+        "name": "Kandy Evac Park",
+        "province": "Central",
+        "capacity": 600,
+        "radius_m": 300,
+        "path": [
+          [80.6410, 7.2936], [80.6425, 7.2960], [80.6440, 7.2990]
+        ]
+      },
+      "geometry": { "type": "Point", "coordinates": [80.6410, 7.2936] }
+    }
+  ]
+}

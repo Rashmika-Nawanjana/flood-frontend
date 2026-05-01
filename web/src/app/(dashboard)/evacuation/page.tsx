@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import MapPlaceholder from '@/components/maps/MapPlaceholder';
+import EvacuationRouteMap from '@/components/maps/EvacuationRouteMap';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { api } from '@/lib/api';
 import type { Zone, Shelter, ApiResponse } from '@/lib/types';
@@ -46,7 +46,7 @@ export default function EvacuationPage() {
 
       <div className={styles.content}>
         <div className={styles.mapArea}>
-          <MapPlaceholder height="100%" title="Evacuation Routes" showEvacuationRoutes shelters={shelters} />
+          <EvacuationRouteMap embedded />
         </div>
         <div className={styles.panel}>
           <h2 className={styles.panelTitle}>Shelters in {zones.find(z => z.zone_id === selectedZoneId)?.zone_name}</h2>

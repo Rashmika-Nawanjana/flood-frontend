@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import MapPlaceholder from '@/components/maps/MapPlaceholder';
 import StatCard from '@/components/ui/StatCard';
 import ProgressBar from '@/components/ui/ProgressBar';
 import RoleGate from '@/components/auth/RoleGate';
 import { api } from '@/lib/api';
 import type { Sensor, ApiResponse } from '@/lib/types';
 import { useSensorStore } from '@/store/useSensorStore';
+import { useZoneStore } from '@/store/useZoneStore';
+import { useMapStore } from '@/store/useMapStore';
 import styles from './page.module.css';
 
 export default function SensorsPage() {
   const sensors = useSensorStore(s => s.sensors);
+  const zones = useZoneStore(s => s.zones);
+  const { selectedZoneId, selectZone } = useMapStore();
   const [filter, setFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -55,6 +60,25 @@ export default function SensorsPage() {
           <option value="ONLINE">Online</option>
           <option value="OFFLINE">Offline</option>
         </select>
+      </div>
+
+      <div className={styles.mapPanel}>
+        <div className={styles.mapHeader}>
+          <div>
+            <h2 className={styles.mapTitle}>Sensor Placement Map</h2>
+            <p className={styles.mapSubtitle}>Sensor pins overlaid with monitored flood zones</p>
+          </div>
+          <span className={styles.mapMeta}>{filtered.length}/{sensors.length} sensors shown • {zones.length} zones</span>
+        </div>
+        <MapPlaceholder
+          height="420px"
+          title="Sensors & Zones"
+          zones={zones}
+          sensors={filtered}
+          selectedZoneId={selectedZoneId || undefined}
+          onZoneClick={(zoneId) => selectZone(zoneId)}
+          showAffectedZones
+        />
       </div>
 
       <div className={styles.grid}>
