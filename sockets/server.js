@@ -15,7 +15,7 @@ const WebSocket = require('ws');
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const SOCKET_PATH = process.env.SOCKET_PATH || '/ws/live';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
-const KAFKA_URL = process.env.KAFKA_URL || 'ws://localhost:19092';
+const KAFKA_URL = process.env.KAFKA_URL || 'ws://127.0.0.1:19092';
 
 // ── HTTP + Socket.IO ─────────────────────────────────
 const server = http.createServer((req, res) => {

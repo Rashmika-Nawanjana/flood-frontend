@@ -11,8 +11,6 @@ build/
 web/node_modules/
 web/.next/
 web/.env.local
-web/test
-web/next-env.d.ts
 web/.vercel
 test/node_modules/
 

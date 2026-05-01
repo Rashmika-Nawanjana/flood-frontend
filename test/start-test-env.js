@@ -47,8 +47,8 @@ async function main() {
   ╔══════════════════════════════════════════════╗
   ║    FloodSense LK — Test Environment          ║
   ║                                               ║
-  ║    Mock Kafka     → ws://localhost:19092       ║
-  ║    Mock API       → http://localhost:5000      ║
+  ║    Mock Kafka     → ws://127.0.0.1:19092       ║
+  ║    Mock API       → http://127.0.0.1:5000      ║
   ║    Socket.IO      → http://localhost:3001      ║
   ║    Dashboard      → http://localhost:3000      ║
   ║                   (start separately)           ║

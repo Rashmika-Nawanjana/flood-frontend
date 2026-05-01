@@ -16,8 +16,8 @@
 const WebSocket = require('ws');
 const http = require('http');
 
-const KAFKA_URL = process.env.KAFKA_URL || 'ws://localhost:19092';
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const KAFKA_URL = process.env.KAFKA_URL || 'ws://127.0.0.1:19092';
+const API_URL = process.env.API_URL || 'http://127.0.0.1:5000';
 const INTERVAL_MS = 10000; // 10 seconds
 
 // ── Zone profiles: each zone has its own escalation offset and peak ──
