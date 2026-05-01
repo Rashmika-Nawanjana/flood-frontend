@@ -1,25 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { usePredictionStore } from '@/store/usePredictionStore';
 import RiskBadge from '@/components/ui/RiskBadge';
-import { api } from '@/lib/api';
-import type { Prediction, ApiResponse } from '@/lib/types';
 import styles from './page.module.css';
 
 export default function PredictionsPage() {
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchPredictions = () => {
-    setLoading(true);
-    api.predictions.list().then((res) => {
-      const d = res as ApiResponse<Prediction[]>;
-      setPredictions(d.data || []);
-    }).catch(console.error).finally(() => setLoading(false));
-  };
-
-  useEffect(() => { fetchPredictions(); }, []);
+  const predictions = usePredictionStore(s => s.predictions);
+  const loading = predictions.length === 0;
 
   return (
     <div className={styles.page}>
@@ -28,9 +15,6 @@ export default function PredictionsPage() {
           <h1 className={styles.title}>AI Flood Predictions</h1>
           <p className={styles.subtitle}>XGBoost ML model predictions with Explainable AI (XAI) risk factors</p>
         </div>
-        <button className={styles.refreshBtn} onClick={fetchPredictions} disabled={loading}>
-          <RefreshCw size={16} className={loading ? styles.spinning : ''} /> Refresh Predictions
-        </button>
       </div>
 
       <div className={styles.grid}>

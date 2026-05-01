@@ -1,25 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
-import { api } from '@/lib/api';
-import type { Alert, ApiResponse } from '@/lib/types';
+import { useAlertStore } from '@/store/useAlertStore';
+import type { Alert } from '@/lib/types';
 import styles from './page.module.css';
 
 export default function AlertsPage() {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const alerts = useAlertStore(s => s.alerts);
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
-
-  useEffect(() => {
-    api.alerts.list().then((res) => {
-      const d = res as ApiResponse<Alert[]>;
-      setAlerts(d.data || []);
-    }).catch(console.error);
-  }, []);
 
   const filtered = alerts.filter((a) => {
     if (filterSeverity !== 'ALL' && a.severity !== filterSeverity) return false;
@@ -34,9 +26,6 @@ export default function AlertsPage() {
           <h1 className={styles.title}>Alert Management</h1>
           <p className={styles.subtitle}>Monitor and manage emergency alerts across the monitored catchments.</p>
         </div>
-        <RoleGate allowed={['admin']}>
-          <button className={styles.createBtn}><Plus size={16} /> Create Alert</button>
-        </RoleGate>
       </div>
 
       <div className={styles.filters}>

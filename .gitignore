@@ -14,6 +14,10 @@ web/.env.local
 web/test
 web/next-env.d.ts
 web/.vercel
+test/node_modules/
+
+#Socket.io Server
+sockets/node_modules
 
 #IDE
 .idea/

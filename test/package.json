@@ -1,0 +1,18 @@
+{
+  "name": "floodsense-test-env",
+  "version": "1.0.0",
+  "description": "Mock test infrastructure for FloodSense LK — API server, Kafka broker, and event producer",
+  "main": "start-test-env.js",
+  "scripts": {
+    "start": "node start-test-env.js",
+    "api": "node mock-api-server.js",
+    "kafka": "node mock-kafka.js",
+    "producer": "node mock-kafka-producer.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "socket.io": "^4.8.3",
+    "ws": "^8.16.0"
+  }
+}

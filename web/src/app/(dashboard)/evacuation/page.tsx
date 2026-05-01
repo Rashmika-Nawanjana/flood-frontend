@@ -1,33 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import MapPlaceholder from '@/components/maps/MapPlaceholder';
+import FloodMap from '@/components/maps/FloodMap';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { api } from '@/lib/api';
-import type { Zone, Shelter, ApiResponse } from '@/lib/types';
+import { useZoneStore } from '@/store/useZoneStore';
+import { useShelterStore } from '@/store/useShelterStore';
+import { useMapStore } from '@/store/useMapStore';
 import styles from './page.module.css';
 
 export default function EvacuationPage() {
-  const [zones, setZones] = useState<Zone[]>([]);
-  const [selectedZoneId, setSelectedZoneId] = useState('');
-  const [shelters, setShelters] = useState<Shelter[]>([]);
-
+  const { zones } = useZoneStore();
+  const { selectedZoneId, selectZone } = useMapStore();
+  const allShelters = useShelterStore(s => s.shelters);
+  
+  // Auto-select first zone if none selected
   useEffect(() => {
-    api.zones.list().then((res) => {
-      const d = res as ApiResponse<Zone[]>;
-      const z = d.data || [];
-      setZones(z);
-      if (z.length > 0) setSelectedZoneId(z[0].zone_id);
-    }).catch(console.error);
-  }, []);
+    if (zones.length > 0 && !selectedZoneId) {
+      selectZone(zones[0].zone_id);
+    }
+  }, [zones, selectedZoneId, selectZone]);
 
-  useEffect(() => {
-    if (!selectedZoneId) return;
-    api.zones.get(selectedZoneId).then((res) => {
-      const d = res as ApiResponse<Zone>;
-      setShelters(d.data?.shelters || []);
-    }).catch(console.error);
-  }, [selectedZoneId]);
+  const shelters = allShelters.filter(s => s.zone_id === selectedZoneId);
+
+
 
   const totalCapacity = shelters.reduce((s, sh) => s + sh.capacity, 0);
   const totalOccupancy = shelters.reduce((s, sh) => s + (sh.current_occupancy || 0), 0);
@@ -39,14 +34,14 @@ export default function EvacuationPage() {
           <h1 className={styles.title}>Evacuation Routes & Shelters</h1>
           <p className={styles.subtitle}>Emergency evacuation routing and shelter capacity overview</p>
         </div>
-        <select className={styles.zoneSelect} value={selectedZoneId} onChange={(e) => setSelectedZoneId(e.target.value)}>
+        <select className={styles.zoneSelect} value={selectedZoneId || ''} onChange={(e) => selectZone(e.target.value)}>
           {zones.map(z => <option key={z.zone_id} value={z.zone_id}>{z.zone_name}</option>)}
         </select>
       </div>
 
       <div className={styles.content}>
         <div className={styles.mapArea}>
-          <MapPlaceholder height="100%" title="Evacuation Routes" showEvacuationRoutes shelters={shelters} />
+          <FloodMap />
         </div>
         <div className={styles.panel}>
           <h2 className={styles.panelTitle}>Shelters in {zones.find(z => z.zone_id === selectedZoneId)?.zone_name}</h2>
@@ -61,7 +56,7 @@ export default function EvacuationPage() {
                 <span className={styles.shelterMeta}>Dist: {sh.distance_km} km • Sector</span>
                 <div className={styles.shelterCapacity}>
                   <span>Capacity Utilization</span>
-                  <span>{sh.current_occupancy || 0}/{sh.capacity} ({Math.round(((sh.current_occupancy || 0) / sh.capacity) * 100)}%)</span>
+                  <span>{sh.current_occupancy || 0}/{sh.capacity} ({Math.round(((sh.current_occupancy || 0) / Math.max(sh.capacity, 1)) * 100)}%)</span>
                 </div>
                 <ProgressBar value={sh.current_occupancy || 0} max={sh.capacity} height={6} showLabel={false} />
               </div>

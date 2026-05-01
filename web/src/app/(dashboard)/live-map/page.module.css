@@ -3,7 +3,7 @@
 .title { font-size: 24px; font-weight: 700; color: var(--text-primary); }
 .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 .content { flex: 1; display: flex; gap: 16px; min-height: 0; }
-.mapArea { flex: 1; border-radius: var(--radius); overflow: hidden; }
+.mapArea { flex: 1; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-height: 500px; }
 .panel { width: 340px; flex-shrink: 0; background-color: var(--bg-surface); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
 .panelTitle { font-family: var(--font-space-grotesk); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
 .zoneList { display: flex; flex-direction: column; gap: 8px; flex: 1; }

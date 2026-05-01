@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import MapPlaceholder from '@/components/maps/MapPlaceholder';
+import FloodMap from '@/components/maps/FloodMap';
 import RiskBadge from '@/components/ui/RiskBadge';
 import { api } from '@/lib/api';
 import type { Zone, ApiResponse } from '@/lib/types';
@@ -24,13 +24,7 @@ export default function LiveMapPage() {
 
       <div className={styles.content}>
         <div className={styles.mapArea}>
-          <MapPlaceholder
-            height="100%"
-            title="Live Flood Map"
-            zones={zones}
-            selectedZoneId={selectedZoneId || undefined}
-            onZoneClick={(id) => selectZone(id)}
-          />
+          <FloodMap />
         </div>
 
         <div className={styles.panel}>

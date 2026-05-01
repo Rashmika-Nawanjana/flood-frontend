@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
@@ -12,8 +12,65 @@ import { useZoneStore } from '@/store/useZoneStore';
 import styles from './page.module.css';
 
 export default function ZonesPage() {
-  const { zones, selectedZoneId, selectZone } = useZoneStore();
-  const [showCreate, setShowCreate] = useState(false);
+  const { zones, selectedZoneId, selectZone, addZone, updateZone, removeZone } = useZoneStore();
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    zone_id: '',
+    zone_name: '',
+    description: '',
+    color_code: '#22C55E'
+  });
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
+    setFormData({ zone_id: '', zone_name: '', description: '', color_code: '#22C55E' });
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (zone: Zone) => {
+    setEditingId(zone.zone_id);
+    setFormData({
+      zone_id: zone.zone_id,
+      zone_name: zone.zone_name,
+      description: zone.description || '',
+      color_code: zone.color_code || '#22C55E'
+    });
+    setShowModal(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      if (editingId) {
+        await api.zones.update(editingId, formData);
+        updateZone(editingId, formData);
+      } else {
+        const payload = {
+          ...formData,
+          basin_id: 'BSN-01',
+          area_sq_km: 10,
+          risk_level: 'LOW' as const,
+          risk_score: 10,
+          population_at_risk: 0
+        };
+        await api.zones.create(payload);
+        addZone(payload as Zone);
+      }
+      setShowModal(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.zones.delete(id);
+      removeZone(id);
+      if (selectedZoneId === id) selectZone(null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Auto-select first zone if none selected
   useEffect(() => {
@@ -36,7 +93,7 @@ export default function ZonesPage() {
           <p className={styles.subtitle}>Manage flood monitoring zones across the Kelani River basin</p>
         </div>
         <RoleGate allowed={['admin']}>
-          <button className={styles.createBtn} onClick={() => setShowCreate(true)}><Plus size={16} /> Create Zone</button>
+          <button className={styles.createBtn} onClick={handleOpenCreate}><Plus size={16} /> Create Zone</button>
         </RoleGate>
       </div>
 
@@ -81,8 +138,16 @@ export default function ZonesPage() {
         {selected && (
           <div className={styles.detail}>
             <div className={styles.detailHeader}>
-              <h2 className={styles.detailName}>{selected.zone_name}</h2>
-              <RiskBadge level={selected.risk_level} size="md" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h2 className={styles.detailName}>{selected.zone_name}</h2>
+                <RiskBadge level={selected.risk_level} size="md" />
+              </div>
+              <RoleGate allowed={['admin']}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button className={styles.iconBtn} onClick={() => handleOpenEdit(selected)}><Edit2 size={16} /></button>
+                  <button className={`${styles.iconBtn} ${styles.dangerText}`} onClick={() => handleDelete(selected.zone_id)}><Trash2 size={16} /></button>
+                </div>
+              </RoleGate>
             </div>
             <span className={styles.detailMeta}>{selected.description} • ID: {selected.zone_id}</span>
 
@@ -125,8 +190,29 @@ export default function ZonesPage() {
         )}
       </div>
 
-      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create New Zone">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Zone creation form — connects to POST /api/v1/admin/zones</p>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Zone' : 'Create New Zone'}>
+        <div className={styles.form}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Zone ID</label>
+            <input className={styles.formInput} placeholder="e.g. ZONE-K10" value={formData.zone_id} onChange={(e) => setFormData(p => ({ ...p, zone_id: e.target.value }))} disabled={!!editingId} />
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Zone Name</label>
+            <input className={styles.formInput} placeholder="e.g. New Colombo Basin" value={formData.zone_name} onChange={(e) => setFormData(p => ({ ...p, zone_name: e.target.value }))} />
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Description</label>
+            <textarea className={styles.formTextarea} placeholder="Detailed description of the zone boundary..." value={formData.description} onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))} />
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Marker Color</label>
+            <input type="color" className={styles.formInput} style={{ height: '40px', padding: '4px' }} value={formData.color_code} onChange={(e) => setFormData(p => ({ ...p, color_code: e.target.value }))} />
+          </div>
+          <div className={styles.formActions} style={{ marginTop: '24px' }}>
+            <button className={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
+            <button className={styles.submitBtn} onClick={handleSave}>{editingId ? 'Save Changes' : 'Create Zone'}</button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
