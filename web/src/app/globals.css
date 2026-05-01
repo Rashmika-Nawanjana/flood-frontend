@@ -1,0 +1,147 @@
+/* =============================================
+   FloodSense LK — Tectonic Sentinel Design System
+   Global CSS Custom Properties & Reset
+   ============================================= */
+
+/* === Google Fonts are loaded via next/font in layout.tsx === */
+
+/* ---- CSS Reset ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ---- Design System Tokens ---- */
+:root {
+  /* Surface Hierarchy (tonal layering — NO borders) */
+  --bg-base: #0b1326;
+  --bg-surface-low: #131b2e;
+  --bg-surface: #171f33;
+  --bg-surface-high: #222a3e;
+  --bg-surface-highest: #2d3449;
+  --bg-footer: #0d1528;
+
+  /* Primary & UI */
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --primary-light: #adc6ff;
+  --primary-container: rgba(59, 130, 246, 0.12);
+
+  /* Semantic Risk Colors */
+  --risk-low: #22C55E;
+  --risk-watch: #EAB308;
+  --risk-warning: #F97316;
+  --risk-high: #EF4444;
+  --risk-critical: #EF4444;
+  --risk-emergency: #A855F7;
+
+  /* Risk Background (12% opacity fills) */
+  --risk-low-bg: rgba(34, 197, 94, 0.12);
+  --risk-watch-bg: rgba(234, 179, 8, 0.12);
+  --risk-warning-bg: rgba(249, 115, 22, 0.12);
+  --risk-high-bg: rgba(239, 68, 68, 0.12);
+  --risk-critical-bg: rgba(239, 68, 68, 0.12);
+  --risk-emergency-bg: rgba(168, 85, 247, 0.12);
+
+  /* Text Hierarchy */
+  --text-primary: #dbe2fd;
+  --text-secondary: #a0a6b8;
+  --text-muted: #8c909f;
+  --text-inverse: #0b1326;
+
+  /* Spacing & Shape */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+  --footer-height: 48px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(23, 31, 51, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(20px);
+}
+
+/* ---- Utility Classes ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ---- Scrollbar Styling ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface-high);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-surface-highest);
+}

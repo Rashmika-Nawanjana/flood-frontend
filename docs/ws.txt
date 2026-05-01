@@ -1,0 +1,154 @@
+Real-Time WebSocket (Socket.IO) Contract
+
+
+Connection URL: ws://<your-server-ip>/ws/live
+
+
+Event 1: Live Sensor Telemetry
+
+Event Name: sensor:update
+Broadcast Trigger: Every 10-15 seconds when Group A1 hardware pushes new data.
+
+{
+  "event": "sensor:update",
+  "timestamp": "2026-04-26T00:35:12Z",
+  "data": {
+    "sensor_id": "MR-KND-001",
+    "zone_id": "ZONE-K1",
+    "current_reading": {
+      "water_level_m": 4.58,
+      "flow_velocity_mps": 0.88,
+      "rainfall_mm_per_hr": 12.0,
+      "temperature_c": 28.5,
+      "air_pressure_hpa": 1011.2,
+      "trend": "RISING"
+    }
+  }
+}
+
+
+Event 2: Zone Risk Level Escalation
+
+Event Name: zone:risk:update
+Broadcast Trigger: When the XGBoost model outputs a new risk score that changes the zone's status (e.g., Warning -> High).
+Frontend Action (A3): Recolor the Zone polygon on the map and update the risk banner.
+
+{
+  "event": "zone:risk:update",
+  "timestamp": "2026-04-26T00:36:00Z",
+  "data": {
+    "zone_id": "ZONE-K1",
+    "zone_name": "Getambe Basin",
+    "previous_level": "WARNING",
+    "current_level": "HIGH",
+    "risk_score": 78.4,
+    "color_code": "#F97316"
+  }
+}
+
+
+Event 3: New XGBoost Prediction
+
+Event Name: prediction:new
+Broadcast Trigger: Every 15 minutes when the ML pipeline finishes evaluating the latest batch of sensor data.
+Frontend Action (A3): Update the "Future Forecast" panel with the new Explainable AI (XAI) factors.
+
+{
+  "event": "prediction:new",
+  "timestamp": "2026-04-26T00:45:00Z",
+  "data": {
+    "prediction_id": "PRED-KND-001",
+    "zone_id": "ZONE-K1",
+    "predicted_peak_level_m": 4.8,
+    "estimated_flood_time": "2026-04-26T03:00:00Z",
+    "severity": "HIGH",
+    "top_risk_factors": [
+      {"factor": "Upstream Water Level", "value": "3.9m", "impact": "High"},
+      {"factor": "Flow Velocity", "value": "0.95 m/s", "impact": "Medium"}
+    ]
+  }
+}
+
+
+Event 4: Emergency Alert Issued
+
+Event Name: alert:new
+Broadcast Trigger: When a prediction severity crosses into CRITICAL or HIGH and an official alert is generated.
+Frontend Action (A3): Trigger native OS push notifications and show a persistent red emergency banner with shelter routing.
+
+{
+  "event": "alert:new",
+  "timestamp": "2026-04-26T01:00:00Z",
+  "data": {
+    "alert_id": "ALT-KND-001",
+    "zone_id": "ZONE-K1",
+    "severity": "HIGH",
+    "title": "Evacuation Warning: Getambe Lowlands",
+    "message": "Water levels rising rapidly. Evacuate to designated shelters.",
+    "recommended_action": "EVACUATE",
+    "recommended_shelters": [
+      {
+        "shelter_id": "SH-K001",
+        "name": "Getambe Temple Hall",
+        "lat": 7.2715,
+        "lng": 80.6125
+      }
+    ]
+  }
+}
+
+
+Event 5: Emergency Alert Resolved
+
+Event Name: alert:resolved
+Broadcast Trigger: When an Admin uses the PATCH /api/v1/alerts endpoint to stand down the emergency.
+Frontend Action (A3): Remove the emergency banner and reset the UI to normal mode.
+
+{
+  "event": "alert:resolved",
+  "timestamp": "2026-04-26T06:00:00Z",
+  "data": {
+    "alert_id": "ALT-KND-001",
+    "zone_id": "ZONE-K1",
+    "resolved_at": "2026-04-26T06:00:00Z",
+    "resolution_note": "Water levels receding. All clear issued."
+  }
+}
+
+
+🔌 Event 6: Sensor Connection Lost
+
+Event Name: sensor:offline
+Broadcast Trigger: When the backend detects no data from a sensor for > 5 minutes.
+Frontend Action (A3): Turn the sensor pin on the map grey to indicate dead hardware.
+
+{
+  "event": "sensor:offline",
+  "timestamp": "2026-04-26T01:10:00Z",
+  "data": {
+    "sensor_id": "MR-KND-002",
+    "zone_id": "ZONE-K2",
+    "last_seen": "2026-04-26T01:05:00Z",
+    "status": "OFFLINE"
+  }
+}
+
+
+Event 7: Data Anomaly Detected (DSE Internal)
+
+Event Name: anomaly:new
+Broadcast Trigger: When the Anomaly ML model (Z-Score/Isolation Forest) flags incoming hardware data as corrupted.
+Frontend Action (A3): Show a warning to Admin users only (ignore for public app).
+
+{
+  "event": "anomaly:new",
+  "timestamp": "2026-04-26T01:15:00Z",
+  "data": {
+    "anomaly_id": "ANM-KND-042",
+    "sensor_id": "MR-KND-001",
+    "type": "SUDDEN_SPIKE",
+    "severity": "HIGH",
+    "anomaly_score": 0.94,
+    "description": "Unnatural water level spike detected. Data discarded from ML pipeline."
+  }
+}

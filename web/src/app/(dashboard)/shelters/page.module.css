@@ -1,0 +1,42 @@
+.page { display: flex; flex-direction: column; gap: 24px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; }
+.title { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+.subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+.addBtn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: var(--primary); color: #fff; border-radius: var(--radius); font-size: 13px; font-weight: 600; }
+.addBtn:hover { background-color: var(--primary-hover); }
+.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.capacityBar { background-color: var(--bg-surface); border-radius: var(--radius); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+.capacityLabel { font-family: var(--font-space-grotesk); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); white-space: nowrap; }
+.tableContainer { background-color: var(--bg-surface); border-radius: var(--radius); overflow: hidden; }
+.table { width: 100%; }
+.table th { padding: 14px 16px; font-family: var(--font-space-grotesk); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); text-align: left; background-color: var(--bg-surface-high); }
+.table td { padding: 14px 16px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--bg-surface-high); }
+.row { transition: background-color var(--transition-fast); }
+.row:hover { background-color: var(--bg-surface-high); }
+.monoCell { font-family: var(--font-jetbrains-mono); font-size: 13px; }
+.shelterName { font-weight: 600; }
+.capacityCell { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+.capacityText { font-family: var(--font-jetbrains-mono); font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.statusBadge { font-family: var(--font-space-grotesk); font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 2px 10px; border-radius: var(--radius-pill); }
+.statusOPEN { color: var(--risk-low); background-color: var(--risk-low-bg); }
+.statusFILLING { color: var(--risk-warning); background-color: var(--risk-warning-bg); }
+.statusFULL { color: var(--risk-critical); background-color: var(--risk-critical-bg); }
+.statusCLOSED { color: var(--text-muted); background-color: var(--bg-surface-high); }
+.menuBtn { font-size: 18px; color: var(--text-muted); padding: 4px 8px; border-radius: var(--radius); }
+.menuBtn:hover { background-color: var(--bg-surface-high); }
+.empty { text-align: center; color: var(--text-muted); padding: 40px; }
+
+/* Modal Form */
+.form { display: flex; flex-direction: column; gap: 20px; }
+.formField { display: flex; flex-direction: column; gap: 6px; }
+.formRow { display: flex; gap: 16px; }
+.formRow .formField { flex: 1; }
+.formLabel { font-family: var(--font-space-grotesk); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.formInput { padding: 12px 16px; background-color: var(--bg-surface-low); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); border: 1px solid var(--bg-surface-high); }
+.formInput:focus { border-color: var(--primary); outline: none; }
+.formInput::placeholder { color: var(--text-muted); }
+.formSelect { padding: 12px 16px; background-color: var(--bg-surface-low); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); border: 1px solid var(--bg-surface-high); cursor: pointer; }
+.formActions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+.cancelBtn { padding: 12px 24px; background-color: var(--bg-surface-high); color: var(--text-primary); border-radius: var(--radius); font-size: 14px; font-weight: 600; }
+.submitBtn { padding: 12px 24px; background-color: var(--primary); color: #fff; border-radius: var(--radius); font-size: 14px; font-weight: 600; }
+.submitBtn:hover { background-color: var(--primary-hover); }

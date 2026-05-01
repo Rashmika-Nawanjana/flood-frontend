@@ -1,3 +1,4 @@
+# Flutter (mobile/)
 .dart_tool/
 .packages
 .pub/
@@ -5,5 +6,15 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 .metadata
+
+# Next.js (dashboard/)
+web/node_modules/
+web/.next/
+web/.env.local
+web/test
+web/next-env.d.ts
+web/.vercel
+
+#IDE
 .idea/
 .vscode/
