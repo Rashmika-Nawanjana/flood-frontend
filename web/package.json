@@ -7,8 +7,11 @@
     "dev:next": "next dev",
     "dev:ngrok": "npx ngrok start --config ../../flood-backend/ngrok.yml flood-backend",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
-    "lint": "next lint"
+    "start:prod": "NODE_ENV=production next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.6",
