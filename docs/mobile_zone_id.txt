@@ -1,0 +1,40 @@
+POST /api/v1/location/resolve
+Accepts a GPS coordinate and returns the zone the user is currently inside, determined by a PostGIS point-in-polygon query on the backend.
+Request Body:
+json{
+  "lat": 7.2721,
+  "lng": 80.6132
+}
+Response:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T01:22:00Z",
+  "coordinates": {
+    "lat": 7.2721,
+    "lng": 80.6132
+  },
+  "zone": {
+    "zone_id": "ZONE-K1",
+    "zone_name": "Getambe Basin",
+    "risk_level": "HIGH",
+    "risk_score": 78.4,
+    "color_code": "#F97316",
+    "active_alerts": 2
+  }
+}
+If the coordinate falls outside all monitored zones:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T01:22:00Z",
+  "coordinates": {
+    "lat": 6.9271,
+    "lng": 79.8612
+  },
+  "zone": null,
+  "message": "Coordinates do not fall within any monitored flood zone."
+}
+
+Two things worth noting for the mobile/backend teams:
+
+Backend query — this is a clean use case for PostGIS's ST_Contains(zone.geometry, ST_Point(lng, lat)) since you already store zone geometries as PostGIS polygons (as seen in the zones API). No extra infrastructure needed.
+Response design — returning risk_level, color_code, and active_alerts inline means the Flutter app can immediately render the correct zone risk UI without needing a second call to /api/v1/zones/{zone_id}.
