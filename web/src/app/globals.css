@@ -146,3 +146,19 @@ table {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--bg-surface-highest);
 }
+
+/* ---- Mapbox Popup Controls ---- */
+.mapboxgl-popup .mapboxgl-popup-close-button {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  line-height: 16px !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50% !important;
+}

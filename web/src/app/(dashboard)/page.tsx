@@ -2,19 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { Activity, Droplets, AlertTriangle as AlertTriangleIcon, Users } from 'lucide-react';
+import AffectedMap from '@/components/maps/AffectedMap';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import { api } from '@/lib/api';
-import type { Sensor, Zone, Alert, Prediction, ApiResponse } from '@/lib/types';
+import type { Prediction, ApiResponse } from '@/lib/types';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useAlertStore } from '@/store/useAlertStore';
+import { useShelterStore } from '@/store/useShelterStore';
+import { mockPredictions } from '@/lib/mockData';
 import styles from './page.module.css';
 
 export default function DashboardPage() {
   const sensors = useSensorStore(s => s.sensors);
   const zones = useZoneStore(s => s.zones);
   const alerts = useAlertStore(s => s.alerts);
+  const shelters = useShelterStore(s => s.shelters);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,9 +27,10 @@ export default function DashboardPage() {
       try {
         const predRes = await api.predictions.list();
         const d = predRes as ApiResponse<Prediction[]>;
-        setPredictions(d.data || []);
+        setPredictions(d.data?.length ? d.data : mockPredictions);
       } catch (err) {
         console.error('Dashboard predictions fetch error:', err);
+        setPredictions(mockPredictions);
       } finally {
         setLoading(false);
       }
@@ -89,6 +94,35 @@ export default function DashboardPage() {
           accentColor="var(--primary)"
           icon={<Users size={20} />}
         />
+      </div>
+
+      {/* Operational Map */}
+      <div className={styles.mapPanel}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>Operational Map</h2>
+          <span className={styles.mapMeta}>
+            {zones.length} zones • {sensors.length} sensors • {shelters.length} shelters
+          </span>
+        </div>
+        <div className={styles.mapPanelBody}>
+          <div className={styles.mapFrame}>
+            <AffectedMap height="100%" showHeader={false} />
+          </div>
+          <div className={styles.mapSummary}>
+            <div className={styles.mapSummaryItem}>
+              <span className={styles.mapSummaryLabel}>Affected Layer</span>
+              <span className={styles.mapSummaryValue}>Live flood zones</span>
+            </div>
+            <div className={styles.mapSummaryItem}>
+              <span className={styles.mapSummaryLabel}>High Risk Zones</span>
+              <span className={styles.mapSummaryValue}>{highRiskZones}</span>
+            </div>
+            <div className={styles.mapSummaryItem}>
+              <span className={styles.mapSummaryLabel}>Population at Risk</span>
+              <span className={styles.mapSummaryValue}>{totalPopulation.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main content row */}

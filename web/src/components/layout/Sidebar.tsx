@@ -40,7 +40,7 @@ export default function Sidebar() {
   useEffect(() => {
     // Sync pathname to store on initial load if needed
     const currentItem = NAV_ITEMS.find(item => 
-      item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+      item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
     );
     if (currentItem) setActiveNavItem(currentItem.label);
   }, [pathname, setActiveNavItem]);
