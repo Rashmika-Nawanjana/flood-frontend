@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { UserRole } from '@/lib/types';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import type { UserRole } from "@/lib/types";
 
 interface User {
   id: string;
@@ -17,15 +17,13 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()(
-  persist(
+  devtools(
     (set) => ({
       user: null,
       isAuthenticated: false,
       setUser: (user) => set({ user, isAuthenticated: true }),
       clearUser: () => set({ user: null, isAuthenticated: false }),
     }),
-    {
-      name: 'auth-storage', // key for localStorage
-    }
-  )
+    { name: "auth-store" },
+  ),
 );
