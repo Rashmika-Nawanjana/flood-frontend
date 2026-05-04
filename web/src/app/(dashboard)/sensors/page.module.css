@@ -1,0 +1,28 @@
+.page { display: flex; flex-direction: column; gap: 24px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; }
+.title { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+.subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+.addBtn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: var(--primary); color: #fff; border-radius: var(--radius); font-size: 13px; font-weight: 600; }
+.addBtn:hover { background-color: var(--primary-hover); }
+.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.filters { display: flex; gap: 12px; }
+.searchInput { flex: 1; padding: 10px 16px; background-color: var(--bg-surface); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); }
+.searchInput::placeholder { color: var(--text-muted); }
+.select { padding: 10px 14px; background-color: var(--bg-surface); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c909f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card { background-color: var(--bg-surface); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: transform var(--transition-fast); }
+.card:hover { transform: translateY(-2px); }
+.cardHeader { display: flex; justify-content: space-between; align-items: flex-start; }
+.sensorId { font-family: var(--font-jetbrains-mono); font-size: 11px; color: var(--text-muted); }
+.sensorName { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 4px; }
+.sensorLocation { font-size: 12px; color: var(--text-muted); }
+.statusDot { font-size: 12px; font-weight: 600; white-space: nowrap; padding: 4px 10px; border-radius: var(--radius-pill); }
+.online { color: var(--risk-low); background-color: var(--risk-low-bg); }
+.offline { color: var(--risk-critical); background-color: var(--risk-critical-bg); }
+.readings { display: flex; gap: 16px; }
+.reading { display: flex; flex-direction: column; gap: 2px; }
+.readingLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.readingValue { font-family: var(--font-jetbrains-mono); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.offlineMsg { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 12px 0; }
+.batteryRow { display: flex; align-items: center; gap: 12px; }
+.batteryLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }

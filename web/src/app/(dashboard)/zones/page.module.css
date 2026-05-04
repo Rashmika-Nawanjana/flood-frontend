@@ -1,0 +1,28 @@
+.page { display: flex; flex-direction: column; gap: 24px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; }
+.title { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+.subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+.createBtn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: var(--primary); color: #fff; border-radius: var(--radius); font-size: 13px; font-weight: 600; }
+.createBtn:hover { background-color: var(--primary-hover); }
+.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.content { display: flex; gap: 16px; }
+.zoneList { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.zoneCard { background-color: var(--bg-surface); border-radius: var(--radius); padding: 20px; border-left: 4px solid var(--primary); cursor: pointer; transition: all var(--transition-fast); }
+.zoneCard:hover { background-color: var(--bg-surface-high); }
+.zoneSelected { border-left-width: 4px; background-color: var(--primary-container); }
+.zoneCardHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.zoneCardName { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.zoneCardId { font-family: var(--font-jetbrains-mono); font-size: 11px; color: var(--text-muted); }
+.zoneCardStats { display: flex; gap: 24px; }
+.zoneCardStat { display: flex; flex-direction: column; gap: 2px; }
+.statLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.statValue { font-family: var(--font-jetbrains-mono); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.detail { width: 400px; flex-shrink: 0; background-color: var(--bg-surface); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 600px; }
+.detailHeader { display: flex; justify-content: space-between; align-items: center; }
+.detailName { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.detailMeta { font-size: 12px; color: var(--text-muted); }
+.sectionTitle { font-family: var(--font-space-grotesk); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 8px; }
+.condGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; background-color: var(--bg-surface-low); border-radius: var(--radius); }
+.condItem { display: flex; flex-direction: column; gap: 4px; }
+.condLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.condValue { font-family: var(--font-jetbrains-mono); font-size: 18px; font-weight: 700; color: var(--text-primary); }
