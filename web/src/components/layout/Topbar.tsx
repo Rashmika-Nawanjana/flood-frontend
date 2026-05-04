@@ -1,42 +1,21 @@
 'use client';
 
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Menu } from 'lucide-react';
+import { useUIStore } from '@/store/useUIStore';
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
+  const { toggleSidebar, sidebarOpen } = useUIStore();
+
   return (
     <header className={styles.topbar}>
-      <div className={styles.brand}>
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 28 28"
-          fill="none"
-          className={styles.brandIcon}
-        >
-          <path
-            d="M3 18c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
-            stroke="#3B82F6"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M3 12c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
-            stroke="#3B82F6"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            opacity="0.5"
-          />
-          <path
-            d="M3 24c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
-            stroke="#3B82F6"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            opacity="0.3"
-          />
-        </svg>
-        <span className={styles.brandText}>FloodSense LK</span>
-      </div>
+      <button 
+        className={styles.toggleButton} 
+        onClick={toggleSidebar}
+        aria-label="Toggle Sidebar"
+      >
+        <Menu size={20} />
+      </button>
 
       <div className={styles.searchContainer}>
         <Search size={16} className={styles.searchIcon} />

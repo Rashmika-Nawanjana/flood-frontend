@@ -1,11 +1,15 @@
+/* =============================================
+   FloodMap — Map container & overlays
+   ============================================= */
+
 .mapContainer {
   width: 100%;
   height: 100%;
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  background-color: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .mapCanvas {
@@ -15,75 +19,59 @@
   height: 100%;
 }
 
+/* ── Loading overlay ── */
 .loadingOverlay {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(4px);
-  color: var(--text-primary);
+  gap: 14px;
+  background-color: rgba(11, 19, 38, 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--text-secondary);
+  font-size: 13px;
   font-weight: 500;
   z-index: 10;
 }
 
-/* Markers */
-.sensorMarker {
-  width: 16px;
-  height: 16px;
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top-color: var(--primary);
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.sensorMarker:hover {
-  transform: scale(1.2);
-}
-.sensorOnline {
-  background-color: var(--primary);
-}
-.sensorOffline {
-  background-color: var(--text-muted);
+  animation: spin 0.9s linear infinite;
 }
 
-.shelterMarker {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  border: 2px solid white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.shelterMarker:hover {
-  transform: scale(1.2);
-}
-.shelterOpen {
-  background-color: var(--risk-low);
-}
-.shelterFull {
-  background-color: var(--risk-critical);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* Mapbox Overrides */
-.mapContainer :global(.mapboxgl-popup-content) {
-  background-color: var(--surface) !important;
-  color: var(--text-primary) !important;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5);
-  font-family: inherit;
+/* ── Error overlay ── */
+.errorOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: rgba(11, 19, 38, 0.9);
+  color: #ef4444;
+  text-align: center;
+  padding: 24px;
+  z-index: 10;
 }
-.mapContainer :global(.mapboxgl-popup-tip) {
-  border-top-color: var(--surface) !important;
-  border-bottom-color: var(--surface) !important;
+
+.errorOverlay strong {
+  font-size: 16px;
+  font-weight: 700;
 }
-.mapContainer :global(.mapboxgl-popup-close-button) {
+
+.errorOverlay p {
+  font-size: 13px;
   color: var(--text-muted);
-}
-.mapContainer :global(.mapboxgl-popup-close-button:hover) {
-  background-color: rgba(255,255,255,0.1);
+  max-width: 300px;
 }

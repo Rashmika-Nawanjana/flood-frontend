@@ -13,6 +13,7 @@ web/.next/
 web/.env.local
 web/.vercel
 test/node_modules/
+web/tsconfig.tsbuildinfo
 
 #Socket.io Server
 sockets/node_modules
@@ -20,3 +21,5 @@ sockets/node_modules
 #IDE
 .idea/
 .vscode/
+.agents/
+

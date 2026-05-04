@@ -7,6 +7,37 @@
 function now() { return new Date().toISOString(); }
 function hoursAgo(h) { return new Date(Date.now() - h * 3600000).toISOString(); }
 
+// Helper to generate an irregular polygon within a bounding box
+function generatePolygon(minLng, minLat, maxLng, maxLat) {
+  const cLng = (minLng + maxLng) / 2;
+  const cLat = (minLat + maxLat) / 2;
+  const rLng = (maxLng - minLng) / 2;
+  const rLat = (maxLat - minLat) / 2;
+  const coords = [];
+  const numPoints = 16;
+  
+  // Unique deformation characteristics for this specific polygon
+  const phase1 = Math.random() * Math.PI * 2;
+  const phase2 = Math.random() * Math.PI * 2;
+  const freq1 = 2 + Math.floor(Math.random() * 4); // Random frequency 2-5
+  const freq2 = 4 + Math.floor(Math.random() * 5); // Random frequency 4-8
+  
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i / numPoints) * 2 * Math.PI;
+    // Organic smooth deformation + slight random noise
+    const wave = (Math.sin(angle * freq1 + phase1) * 0.15) + (Math.cos(angle * freq2 + phase2) * 0.15);
+    const noise = (Math.random() - 0.5) * 0.1;
+    const jitter = 0.75 + wave + noise;
+    
+    coords.push([
+      Number((cLng + Math.cos(angle) * rLng * jitter).toFixed(4)),
+      Number((cLat + Math.sin(angle) * rLat * jitter).toFixed(4))
+    ]);
+  }
+  coords.push(coords[0]); // Close the polygon
+  return [coords];
+}
+
 const sensors = [
   {
     sensor_id: 'MR-KND-001', name: 'Mahaweli River — Getambe Bridge',
@@ -76,7 +107,7 @@ const zones = [
     description: 'Lower Mahaweli region near Peradeniya — historically flood-prone during monsoon',
     risk_level: 'LOW', risk_score: 15.0, color_code: '#22C55E',
     population_at_risk: 20500, sensors_in_zone: ['MR-KND-001'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[80.605, 7.265], [80.622, 7.265], [80.622, 7.280], [80.605, 7.280], [80.605, 7.265]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(80.605, 7.265, 80.622, 7.280) },
     current_conditions: { avg_water_level_m: 2.15, max_water_level_m: 2.35, avg_flow_velocity_mps: 0.45, total_rainfall_mm: 18.5, trend: 'STABLE' }
   },
   {
@@ -84,7 +115,7 @@ const zones = [
     description: 'Upstream Mahaweli segment — university and botanical garden area',
     risk_level: 'LOW', risk_score: 10.0, color_code: '#22C55E',
     population_at_risk: 15200, sensors_in_zone: ['MR-KND-002'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[80.585, 7.245], [80.600, 7.245], [80.600, 7.260], [80.585, 7.260], [80.585, 7.245]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(80.585, 7.245, 80.600, 7.260) },
     current_conditions: { avg_water_level_m: 1.80, max_water_level_m: 2.00, avg_flow_velocity_mps: 0.38, total_rainfall_mm: 8.2, trend: 'STABLE' }
   },
   {
@@ -92,7 +123,7 @@ const zones = [
     description: 'Kelani River lowlands — dense urban area prone to flash flooding',
     risk_level: 'WATCH', risk_score: 28.0, color_code: '#EAB308',
     population_at_risk: 45200, sensors_in_zone: ['KR-001'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[79.850, 6.910], [79.870, 6.910], [79.870, 6.940], [79.850, 6.940], [79.850, 6.910]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(79.850, 6.910, 79.870, 6.940) },
     current_conditions: { avg_water_level_m: 2.40, max_water_level_m: 2.65, avg_flow_velocity_mps: 0.55, total_rainfall_mm: 32.0, trend: 'RISING' }
   },
   {
@@ -100,7 +131,7 @@ const zones = [
     description: 'Mid-stream Kelani segment — residential suburbs with moderate flood risk',
     risk_level: 'LOW', risk_score: 12.0, color_code: '#22C55E',
     population_at_risk: 32800, sensors_in_zone: ['KR-002'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[79.970, 6.920], [79.990, 6.920], [79.990, 6.945], [79.970, 6.945], [79.970, 6.920]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(79.970, 6.920, 79.990, 6.945) },
     current_conditions: { avg_water_level_m: 1.95, max_water_level_m: 2.10, avg_flow_velocity_mps: 0.40, total_rainfall_mm: 12.0, trend: 'STABLE' }
   },
   {
@@ -108,7 +139,7 @@ const zones = [
     description: 'Upper Kelani region — major upstream flood source during southwest monsoon',
     risk_level: 'WATCH', risk_score: 30.0, color_code: '#EAB308',
     population_at_risk: 28600, sensors_in_zone: ['KR-003'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[80.075, 6.890], [80.095, 6.890], [80.095, 6.915], [80.075, 6.915], [80.075, 6.890]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(80.075, 6.890, 80.095, 6.915) },
     current_conditions: { avg_water_level_m: 2.60, max_water_level_m: 2.85, avg_flow_velocity_mps: 0.62, total_rainfall_mm: 42.0, trend: 'RISING' }
   },
   {
@@ -116,7 +147,7 @@ const zones = [
     description: 'Rural mid-Kelani area — agricultural land with seasonal flooding',
     risk_level: 'LOW', risk_score: 18.0, color_code: '#22C55E',
     population_at_risk: 12400, sensors_in_zone: [], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[80.120, 6.960], [80.145, 6.960], [80.145, 6.985], [80.120, 6.985], [80.120, 6.960]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(80.120, 6.960, 80.145, 6.985) },
     current_conditions: { avg_water_level_m: 1.50, max_water_level_m: 1.75, avg_flow_velocity_mps: 0.30, total_rainfall_mm: 10.0, trend: 'STABLE' }
   },
   {
@@ -124,7 +155,7 @@ const zones = [
     description: 'Lower Kelani near river mouth — tidal influence zone, dense population',
     risk_level: 'LOW', risk_score: 14.0, color_code: '#22C55E',
     population_at_risk: 52100, sensors_in_zone: ['KR-004'], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[79.912, 6.945], [79.932, 6.945], [79.932, 6.965], [79.912, 6.965], [79.912, 6.945]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(79.912, 6.945, 79.932, 6.965) },
     current_conditions: { avg_water_level_m: 2.10, max_water_level_m: 2.30, avg_flow_velocity_mps: 0.48, total_rainfall_mm: 15.0, trend: 'STABLE' }
   },
   {
@@ -132,19 +163,19 @@ const zones = [
     description: 'Kelani tributary confluence — low-lying area with poor drainage',
     risk_level: 'LOW', risk_score: 16.0, color_code: '#22C55E',
     population_at_risk: 18900, sensors_in_zone: [], active_alerts: 0, last_updated: now(),
-    geometry: { type: 'Polygon', coordinates: [[[80.030, 6.950], [80.050, 6.950], [80.050, 6.975], [80.030, 6.975], [80.030, 6.950]]] },
+    geometry: { type: 'Polygon', coordinates: generatePolygon(80.030, 6.950, 80.050, 6.975) },
     current_conditions: { avg_water_level_m: 1.70, max_water_level_m: 1.90, avg_flow_velocity_mps: 0.35, total_rainfall_mm: 11.0, trend: 'STABLE' }
   }
 ];
 
 const shelters = [
-  { shelter_id: 'SH-K001', name: 'Getambe Temple Hall', zone_id: 'ZONE-K1', lat: 7.2715, lng: 80.6125, capacity: 400, current_occupancy: 0, contact_number: '+94812222222', status: 'OPEN', distance_km: 1.2 },
-  { shelter_id: 'SH-K002', name: 'Peradeniya Community Center', zone_id: 'ZONE-K2', lat: 7.2540, lng: 80.5950, capacity: 300, current_occupancy: 0, contact_number: '+94812233333', status: 'OPEN', distance_km: 0.8 },
-  { shelter_id: 'SH-K003', name: 'Kolonnawa Municipal Hall', zone_id: 'ZONE-K3', lat: 6.9220, lng: 79.8620, capacity: 600, current_occupancy: 0, contact_number: '+94112444444', status: 'OPEN', distance_km: 1.5 },
-  { shelter_id: 'SH-K004', name: 'Kaduwela Sports Complex', zone_id: 'ZONE-K4', lat: 6.9320, lng: 79.9820, capacity: 500, current_occupancy: 0, contact_number: '+94112555555', status: 'OPEN', distance_km: 2.0 },
-  { shelter_id: 'SH-K005', name: 'Hanwella Town Hall', zone_id: 'ZONE-K5', lat: 6.9030, lng: 80.0870, capacity: 350, current_occupancy: 0, contact_number: '+94362266666', status: 'OPEN', distance_km: 1.0 },
-  { shelter_id: 'SH-K006', name: 'Pugoda School Gymnasium', zone_id: 'ZONE-K6', lat: 6.9650, lng: 80.1300, capacity: 250, current_occupancy: 0, contact_number: '+94362277777', status: 'OPEN', distance_km: 0.5 },
-  { shelter_id: 'SH-K007', name: 'Kelaniya Temple Annex', zone_id: 'ZONE-K7', lat: 6.9560, lng: 79.9230, capacity: 450, current_occupancy: 0, contact_number: '+94112388888', status: 'OPEN', distance_km: 0.7 },
+  { shelter_id: 'SH-K001', name: 'Getambe Temple Hall', zone_id: 'ZONE-K1', lat: 7.2715, lng: 80.6125, capacity: 400, current_occupancy: 45, contact_number: '+94812222222', status: 'OPEN', distance_km: 1.2 },
+  { shelter_id: 'SH-K002', name: 'Peradeniya Community Center', zone_id: 'ZONE-K2', lat: 7.2540, lng: 80.5950, capacity: 300, current_occupancy: 120, contact_number: '+94812233333', status: 'OPEN', distance_km: 0.8 },
+  { shelter_id: 'SH-K003', name: 'Kolonnawa Municipal Hall', zone_id: 'ZONE-K3', lat: 6.9220, lng: 79.8620, capacity: 600, current_occupancy: 580, contact_number: '+94112444444', status: 'FULL', distance_km: 1.5 },
+  { shelter_id: 'SH-K004', name: 'Kaduwela Sports Complex', zone_id: 'ZONE-K4', lat: 6.9320, lng: 79.9820, capacity: 500, current_occupancy: 250, contact_number: '+94112555555', status: 'OPEN', distance_km: 2.0 },
+  { shelter_id: 'SH-K005', name: 'Hanwella Town Hall', zone_id: 'ZONE-K5', lat: 6.9030, lng: 80.0870, capacity: 350, current_occupancy: 310, contact_number: '+94362266666', status: 'OPEN', distance_km: 1.0 },
+  { shelter_id: 'SH-K006', name: 'Pugoda School Gymnasium', zone_id: 'ZONE-K6', lat: 6.9650, lng: 80.1300, capacity: 250, current_occupancy: 10, contact_number: '+94362277777', status: 'OPEN', distance_km: 0.5 },
+  { shelter_id: 'SH-K007', name: 'Kelaniya Temple Annex', zone_id: 'ZONE-K7', lat: 6.9560, lng: 79.9230, capacity: 450, current_occupancy: 200, contact_number: '+94112388888', status: 'OPEN', distance_km: 0.7 },
   { shelter_id: 'SH-K008', name: 'Malwana Community Center', zone_id: 'ZONE-K8', lat: 6.9550, lng: 80.0400, capacity: 280, current_occupancy: 0, contact_number: '+94362299999', status: 'OPEN', distance_km: 1.3 },
 ];
 

@@ -16,6 +16,8 @@ import type {
   AnomalyNewEvent,
   RiskLevel,
   RiskFactor,
+  Zone,
+  Anomaly,
 } from '@/lib/types';
 
 /**
@@ -92,16 +94,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     // ── Event 1: sensor:update ────────────────────────
     socket.on('sensor:update', (data: SensorUpdateEvent) => {
+      const { trend: _trend, ...reading } = data.current_reading;
       useSensorStore.getState().updateSensor(data.sensor_id, {
-        readings: data.current_reading,
-        current_reading: { ...data.current_reading, recorded_at: new Date().toISOString() },
+        readings: reading,
+        current_reading: { ...reading, recorded_at: new Date().toISOString() },
       });
     });
 
     // ── Event 2: zone:risk:update ─────────────────────
     // Now also carries population_at_risk from the producer
     socket.on('zone:risk:update', (data: ZoneRiskPayload) => {
-      const update: Record<string, unknown> = {
+      const update: Partial<Zone> = {
         risk_level: data.current_level,
         risk_score: data.risk_score,
         color_code: data.color_code,
@@ -118,25 +121,26 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       usePredictionStore.getState().addPrediction({
         prediction_id: data.prediction_id,
         zone_id: data.zone_id,
-        zone_name: data.zone_name || data.zone_id,
-        created_at: data.created_at || new Date().toISOString(),
-        prediction_window: data.prediction_window || { from: new Date().toISOString(), to: new Date(Date.now() + 6 * 3600000).toISOString() },
-        flood_probability_percent: data.flood_probability_percent || 0,
+        zone_name: data.zone_name ?? data.zone_id,
+        created_at: data.created_at ?? new Date().toISOString(),
+        prediction_window: data.prediction_window ?? { from: new Date().toISOString(), to: new Date(Date.now() + 6 * 3600000).toISOString() },
+        flood_probability_percent: data.flood_probability_percent ?? 0,
         predicted_peak_level_m: data.predicted_peak_level_m,
         estimated_flood_time: data.estimated_flood_time,
         severity: data.severity,
-        confidence_percent: data.confidence_percent || 0,
-        model_version: data.model_version || 'XGBoost-v2.3.1-SL',
-        top_risk_factors: data.top_risk_factors || [],
+        confidence_percent: data.confidence_percent ?? 0,
+        model_version: data.model_version ?? 'XGBoost-v2.3.1-SL',
+        top_risk_factors: data.top_risk_factors ?? [],
       });
     });
 
     // ── Event 4: alert:new ────────────────────────────
     socket.on('alert:new', (data: AlertNewEvent) => {
+      const raw = data as unknown as Record<string, unknown>;
       useAlertStore.getState().addAlert({
         alert_id: data.alert_id,
         zone_id: data.zone_id,
-        zone_name: (data as Record<string, unknown>).zone_name as string || data.zone_id,
+        zone_name: (raw.zone_name as string) ?? data.zone_id,
         severity: data.severity,
         severity_code: data.severity === 'CRITICAL' ? 4 : data.severity === 'HIGH' ? 3 : 2,
         title: data.title,
@@ -145,9 +149,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         triggered_by: 'XGBOOST_AUTOMATED',
         status: 'ACTIVE',
         resolved_at: null,
-        affected_population: (data as Record<string, unknown>).affected_population as number || 0,
+        affected_population: (raw.affected_population as number) ?? 0,
         recommended_action: data.recommended_action,
-        recommended_shelters: data.recommended_shelters,
+        recommended_shelters: data.recommended_shelters?.map((s) => ({
+          ...s,
+          capacity: 0,
+          contact_number: '',
+        })),
       });
     });
 
@@ -162,25 +170,26 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     // ── Event 6: sensor:offline ───────────────────────
     socket.on('sensor:offline', (data: SensorOfflineEvent) => {
       useSensorStore.getState().updateSensor(data.sensor_id, {
-        status: { device_online: false, battery_percent: 0, signal_strength_dbm: 0, last_seen: data.last_seen },
+        status: { is_online: false, device_online: false, battery_percent: 0, signal_strength_dbm: 0, last_seen: data.last_seen },
         device_health: { is_online: false, battery_percent: 0, signal_strength_dbm: 0, last_seen: data.last_seen },
       });
     });
 
     // ── Event 7: anomaly:new ──────────────────────────
     socket.on('anomaly:new', (data: AnomalyNewEvent) => {
+      const raw = data as unknown as Record<string, unknown>;
       useAnomalyStore.getState().addAnomaly({
         anomaly_id: data.anomaly_id,
         sensor_id: data.sensor_id,
         detected_at: new Date().toISOString(),
-        type: data.type as 'SUDDEN_SPIKE' | 'SENSOR_DRIFT' | 'FLATLINE_ERROR' | 'RAPID_DESCENT' | 'NOISE_THRESHOLD',
+        type: data.type as Anomaly['type'],
         description: data.description,
         severity: data.severity,
         anomaly_score: data.anomaly_score,
-        reading_at_detection: (data as Record<string, unknown>).reading_at_detection as { water_level_m: number; rate_of_change_m_per_hr: number } || { water_level_m: 0, rate_of_change_m_per_hr: 0 },
-        expected_range: (data as Record<string, unknown>).expected_range as { min_m: number; max_m: number } || { min_m: 0, max_m: 0 },
+        reading_at_detection: (raw.reading_at_detection as Anomaly['reading_at_detection']) ?? { water_level_m: 0, rate_of_change_m_per_hr: 0 },
+        expected_range: (raw.expected_range as Anomaly['expected_range']) ?? { min_m: 0, max_m: 0 },
         status: 'UNRESOLVED',
-        auto_alert_triggered: (data as Record<string, unknown>).auto_alert_triggered as boolean || false,
+        auto_alert_triggered: (raw.auto_alert_triggered as boolean) ?? false,
       });
     });
 

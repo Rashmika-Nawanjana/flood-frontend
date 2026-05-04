@@ -6,10 +6,25 @@ import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useAlertStore } from '@/store/useAlertStore';
 import { useShelterStore } from '@/store/useShelterStore';
+import { useUIStore } from '@/store/useUIStore';
 import type { Sensor, Zone, Alert, Shelter, ApiResponse } from '@/lib/types';
 
 export default function AppInitializer() {
   const initialized = useRef(false);
+  const { sidebarOpen } = useUIStore();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--current-sidebar-width',
+      sidebarOpen ? 'var(--sidebar-width)' : 'var(--sidebar-collapsed-width)'
+    );
+    
+    if (sidebarOpen) {
+      document.documentElement.classList.remove('sidebar-collapsed');
+    } else {
+      document.documentElement.classList.add('sidebar-collapsed');
+    }
+  }, [sidebarOpen]);
 
   useEffect(() => {
     if (initialized.current) return;

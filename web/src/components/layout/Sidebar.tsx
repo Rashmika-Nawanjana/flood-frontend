@@ -35,8 +35,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const { activeNavItem, setActiveNavItem } = useUIStore();
-
+  const { activeNavItem, setActiveNavItem, sidebarOpen } = useUIStore();
+  
   useEffect(() => {
     // Sync pathname to store on initial load if needed
     const currentItem = NAV_ITEMS.find(item => 
@@ -46,7 +46,39 @@ export default function Sidebar() {
   }, [pathname, setActiveNavItem]);
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${!sidebarOpen ? styles.collapsed : ''}`}>
+      <div className={styles.brand}>
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 28 28"
+          fill="none"
+          className={styles.brandIcon}
+        >
+          <path
+            d="M3 18c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
+            stroke="#3B82F6"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M3 12c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
+            stroke="#3B82F6"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            opacity="0.5"
+          />
+          <path
+            d="M3 24c2-3 4-5 7-5s5 4 7 4 4-2 7-4"
+            stroke="#3B82F6"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            opacity="0.3"
+          />
+        </svg>
+        {sidebarOpen && <span className={styles.brandText}>FloodSense LK</span>}
+      </div>
+
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {NAV_ITEMS.map((item) => {

@@ -1,7 +1,7 @@
 .topbar {
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--current-sidebar-width, var(--sidebar-width));
   right: 0;
   height: var(--topbar-height);
   background-color: var(--bg-surface);
@@ -10,13 +10,25 @@
   justify-content: space-between;
   padding: 0 24px;
   z-index: 100;
+  transition: left var(--transition-normal);
+  border-bottom: 1px solid var(--glass-border);
 }
 
-.brand {
+.toggleButton {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 200px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  margin-left: -12px;
+}
+
+.toggleButton:hover {
+  background-color: var(--bg-surface-high);
+  color: var(--text-primary);
 }
 
 .brandIcon {

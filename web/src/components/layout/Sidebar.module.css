@@ -1,21 +1,53 @@
 .sidebar {
   position: fixed;
-  top: var(--topbar-height);
+  top: 0;
   left: 0;
   width: var(--sidebar-width);
-  height: calc(100vh - var(--topbar-height));
+  height: 100vh;
   background-color: var(--bg-surface-low);
   display: flex;
   flex-direction: column;
-  z-index: 90;
-  overflow-y: auto;
+  z-index: 110;
+  overflow: hidden;
+  transition: width var(--transition-normal);
+  border-right: 1px solid var(--glass-border);
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 16px 0;
+  height: calc(100% - var(--topbar-height));
+  padding-bottom: 16px;
+  overflow-y: auto;
+}
+
+.brand {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 12px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.collapsed .brand {
+  padding: 0;
+  justify-content: center;
+}
+
+.brandText {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .navList {
@@ -42,6 +74,18 @@
   border-left: 3px solid transparent;
   transition: all var(--transition-fast);
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.collapsed .navItem {
+  padding: 12px 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.collapsed .navItem span {
+  display: none;
 }
 
 .navItem:hover {

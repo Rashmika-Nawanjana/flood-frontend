@@ -100,6 +100,7 @@ table {
 
   /* Layout */
   --sidebar-width: 240px;
+  --sidebar-collapsed-width: 72px;
   --topbar-height: 64px;
   --footer-height: 48px;
 
