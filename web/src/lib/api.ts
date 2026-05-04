@@ -96,6 +96,8 @@ export const api = {
   alerts: {
     list: (params?: { severity?: string; status?: string; zone_id?: string }) =>
       fetcher('/alerts', params as Record<string, string>),
+    resolve: (id: string, data: { status: string; resolution_note: string; resolved_by: string }) =>
+      mutate('PATCH', `/admin/alerts/${id}`, data),
   },
 
   // Predictions (1 endpoint)

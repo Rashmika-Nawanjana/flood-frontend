@@ -5,12 +5,14 @@ import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
 import { useAnomalyStore } from '@/store/useAnomalyStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import { ANOMALY_TYPES } from '@/lib/constants';
 import type { Anomaly } from '@/lib/types';
 import styles from './page.module.css';
 
 export default function AnomaliesPage() {
+  const user = useAuthStore(s => s.user);
   const anomalies = useAnomalyStore(s => s.anomalies);
   const resolveAnomalyStore = useAnomalyStore(s => s.resolveAnomaly);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -26,7 +28,11 @@ export default function AnomaliesPage() {
 
   const handleResolve = async (id: string, resolution: string) => {
     try {
-      await api.anomalies.resolve(id, { status: 'RESOLVED', resolution_note: resolution, resolved_by: 'ADMIN' });
+      await api.anomalies.resolve(id, { 
+        status: 'RESOLVED', 
+        resolution_note: resolution, 
+        resolved_by: user?.role.toUpperCase() || 'UNKNOWN' 
+      });
       resolveAnomalyStore(id);
     } catch (e) { console.error(e); }
   };

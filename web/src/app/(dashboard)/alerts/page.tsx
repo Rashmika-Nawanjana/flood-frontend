@@ -4,11 +4,15 @@ import { useState } from 'react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
 import { useAlertStore } from '@/store/useAlertStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { api } from '@/lib/api';
 import type { Alert } from '@/lib/types';
 import styles from './page.module.css';
 
 export default function AlertsPage() {
+  const user = useAuthStore(s => s.user);
   const alerts = useAlertStore(s => s.alerts);
+  const resolveAlertStore = useAlertStore(s => s.resolveAlert);
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
@@ -18,6 +22,24 @@ export default function AlertsPage() {
     if (filterStatus !== 'ALL' && a.status !== filterStatus) return false;
     return true;
   });
+
+  const handleResolve = async () => {
+    if (!selected) return;
+    try {
+      await api.alerts.resolve(selected.alert_id, {
+        status: 'RESOLVED',
+        resolution_note: 'Resolved via dashboard',
+        resolved_by: user?.role.toUpperCase() || 'UNKNOWN'
+      });
+      resolveAlertStore(selected.alert_id, {
+        resolved_at: new Date().toISOString(),
+        resolution_note: 'Resolved via dashboard'
+      });
+      setSelected(null);
+    } catch (e) {
+      console.error('Alert resolution error:', e);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -94,9 +116,15 @@ export default function AlertsPage() {
                 <span className={styles.detailValue}>{selected.recommended_action}</span>
               </div>
             </div>
-            <RoleGate allowed={['admin']}>
+            <RoleGate allowed={['admin', 'officer']}>
               <div className={styles.detailActions}>
-                <button className={styles.resolveBtn}>Resolve Alert & Close Case</button>
+                <button 
+                  className={styles.resolveBtn} 
+                  onClick={handleResolve}
+                  disabled={selected.status === 'RESOLVED'}
+                >
+                  {selected.status === 'RESOLVED' ? 'Alert Resolved' : 'Resolve Alert & Close Case'}
+                </button>
               </div>
             </RoleGate>
           </div>
