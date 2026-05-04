@@ -1,0 +1,101 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #0b1326;
+  padding: 20px;
+}
+
+.container :global(.cl-rootBox) {
+  width: 100%;
+  max-width: 420px;
+}
+
+.container :global(.cl-card) {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.container :global(.cl-headerTitle) {
+  color: #f3f4f6;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.container :global(.cl-headerSubtitle) {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.container :global(.cl-formFieldLabel) {
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.container :global(.cl-formFieldInput) {
+  background-color: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #f3f4f6;
+  font-size: 14px;
+}
+
+.container :global(.cl-formFieldInput:focus) {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.container :global(.cl-formButtonPrimary) {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 150ms ease-out;
+}
+
+.container :global(.cl-formButtonPrimary:hover) {
+  background-color: #2563eb;
+}
+
+.container :global(.cl-socialButtonsBlockButton) {
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #f3f4f6;
+  background-color: transparent;
+}
+
+.container :global(.cl-socialButtonsBlockButton:hover) {
+  background-color: #374151;
+}
+
+.container :global(.cl-dividerLine) {
+  background-color: #374151;
+}
+
+.container :global(.cl-dividerText) {
+  color: #9ca3af;
+}
+
+.container :global(.cl-footerActionLink) {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 150ms ease-out;
+}
+
+.container :global(.cl-footerActionLink:hover) {
+  color: #2563eb;
+}
+
+/* Hide Clerk branding elements */
+.container :global(.cl-logoBox),
+.container :global(.cl-badge),
+.container :global(.cl-clerk-loading),
+.container :global([class*="development"]),
+.container :global([class*="devBadge"]) {
+  display: none !important;
+}
