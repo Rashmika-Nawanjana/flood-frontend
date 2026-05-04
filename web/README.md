@@ -204,23 +204,41 @@ Copy `.env.local.example` to `.env.local` and fill in as needed:
 
 ```bash
 # API Gateway (Group A2 backend)
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
 
 # Socket.IO Server (Member 4)
 NEXT_PUBLIC_WS_URL=ws://localhost:3001/ws/live
 
-# Keycloak SSO (Group A4)
-KEYCLOAK_ISSUER=
-KEYCLOAK_CLIENT_ID=
-KEYCLOAK_CLIENT_SECRET=
-NEXTAUTH_SECRET=dev-secret-change-in-production
-NEXTAUTH_URL=http://localhost:3000
+# Clerk auth (frontend)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_REPLACE_WITH_YOUR_KEY
+CLERK_SECRET_KEY=sk_test_REPLACE_WITH_YOUR_KEY
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+
+# Optional if you want to route auth through a public tunnel
+# NEXT_PUBLIC_CLERK_PROXY_URL=
 
 # Mapbox (Member 3)
 NEXT_PUBLIC_MAPBOX_TOKEN=
 ```
 
-> **Dev Mode:** When `KEYCLOAK_ISSUER` is empty, the login page shows a **dev bypass** role selector (Admin / Officer) so you can test all features without a running Keycloak instance.
+For local development, `npm run dev` now starts the Next.js app and the ngrok tunnel together. The tunnel is only for Clerk webhooks and other public callbacks; the app itself still runs on `localhost`.
+
+The backend already includes an ngrok config at [flood-backend/ngrok.yml](../../flood-backend/ngrok.yml) that exposes the webhook endpoint. Point the Clerk dashboard webhook to:
+
+`https://revenge-crank-bobcat.ngrok-free.dev/v1/webhooks/clerk`
+
+Backend Clerk verification still needs these env vars:
+
+```bash
+CLERK_JWKS_URL=https://useful-hen-13.clerk.accounts.dev/.well-known/jwks.json
+CLERK_ISSUER=https://useful-hen-13.clerk.accounts.dev
+CLERK_WEBHOOK_SECRET=
+```
+
+`CLERK_WEBHOOK_SECRET` is only required if you validate the webhook signature in the backend.
 
 ---
 
