@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import EvacuationRouteMap from '@/components/maps/EvacuationRouteMap';
+import { useEffect } from 'react';
+import FloodMap from '@/components/maps/FloodMap';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useShelterStore } from '@/store/useShelterStore';
@@ -50,7 +50,7 @@ export default function EvacuationPage() {
 
       <div className={styles.content}>
         <div className={styles.mapArea}>
-          <EvacuationRouteMap embedded />
+          <FloodMap mode="evacuation" />
         </div>
         <div className={styles.panel}>
           <h2 className={styles.panelTitle}>

@@ -9,11 +9,6 @@
 .searchInput { flex: 1; padding: 10px 16px; background-color: var(--bg-surface); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); }
 .searchInput::placeholder { color: var(--text-muted); }
 .select { padding: 10px 14px; background-color: var(--bg-surface); border-radius: var(--radius); font-size: 14px; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c909f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-.mapPanel { background-color: var(--bg-surface); border-radius: var(--radius); padding: 24px; }
-.mapHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-.mapTitle { font-family: var(--font-space-grotesk); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
-.mapSubtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-.mapMeta { font-family: var(--font-jetbrains-mono); font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .card { background-color: var(--bg-surface); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: transform var(--transition-fast); }
 .card:hover { transform: translateY(-2px); }
@@ -31,27 +26,3 @@
 .offlineMsg { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 12px 0; }
 .batteryRow { display: flex; align-items: center; gap: 12px; }
 .batteryLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }
-
-@media (max-width: 1024px) {
-  .statsGrid,
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 720px) {
-  .header,
-  .mapHeader,
-  .filters {
-    flex-direction: column;
-  }
-
-  .statsGrid,
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mapMeta {
-    white-space: normal;
-  }
-}

@@ -40,61 +40,6 @@
   gap: 16px;
 }
 
-.mapPanel {
-  background-color: var(--bg-surface);
-  border-radius: var(--radius);
-  padding: 24px;
-}
-
-.mapPanelBody {
-  display: grid;
-  grid-template-columns: minmax(280px, 420px) minmax(220px, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.mapFrame {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 420px;
-  overflow: hidden;
-  border-radius: var(--radius);
-  background-color: var(--bg-surface-low);
-}
-
-.mapSummary {
-  display: grid;
-  gap: 12px;
-}
-
-.mapSummaryItem {
-  padding: 14px 16px;
-  background-color: var(--bg-surface-low);
-  border-radius: var(--radius);
-}
-
-.mapSummaryLabel {
-  display: block;
-  font-family: var(--font-space-grotesk);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.mapSummaryValue {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.mapMeta {
-  font-family: var(--font-jetbrains-mono);
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
 /* Card */
 .card {
   background-color: var(--bg-surface);
@@ -241,40 +186,4 @@
   height: 8px;
   border-radius: 50%;
   background-color: var(--risk-low);
-}
-
-@media (max-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .contentGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .mapPanelBody {
-    grid-template-columns: 1fr;
-  }
-
-  .mapFrame {
-    max-width: 420px;
-  }
-}
-
-@media (max-width: 640px) {
-  .header,
-  .cardHeader {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .statsGrid,
-  .healthGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .mapPanel,
-  .card {
-    padding: 16px;
-  }
 }
