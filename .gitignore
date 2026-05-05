@@ -11,12 +11,18 @@ build/
 web/node_modules/
 web/.next/
 web/.env.local
+web/.env
 web/.vercel
 test/node_modules/
 web/tsconfig.tsbuildinfo
 
 #Socket.io Server
 sockets/node_modules
+
+# Frontend local env files at repo root
+.env
+.env.local
+.env.*
 
 #IDE
 .idea/
