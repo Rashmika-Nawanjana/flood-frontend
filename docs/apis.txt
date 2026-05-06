@@ -484,3 +484,237 @@ JSON
   "resolution_note": "Sensor cleared of debris. Data flow back to normal.",
   "resolved_by": "TECH-04"
 }
+
+19. GET /api/v1/zones/{zone_id}/sensors
+Returns all sensors belonging to a specific zone.
+json{
+  "status": "success",
+  "timestamp": "2026-04-22T23:05:00Z",
+  "zone_id": "ZONE-K1",
+  "zone_name": "Getambe Basin",
+  "count": 2,
+  "data": [
+    {
+      "sensor_id": "MR-KND-001",
+      "name": "Mahaweli River — Getambe Bridge",
+      "location": {
+        "lat": 7.2721,
+        "lng": 80.6132,
+        "zone_id": "ZONE-K1",
+        "zone_name": "Getambe Basin"
+      },
+      "readings": {
+        "water_level_m": 4.53,
+        "rainfall_mm_per_hr": 8.2,
+        "flow_velocity_mps": 0.85,
+        "temperature_c": 28.5,
+        "air_pressure_hpa": 1011.2
+      },
+      "status": {
+        "device_online": true,
+        "battery_percent": 75,
+        "signal_strength_dbm": -68,
+        "last_seen": "2026-04-22T23:04:12Z"
+      },
+      "thresholds": {
+        "water_level_warning_m": 5.0,
+        "water_level_critical_m": 6.5
+      }
+    },
+    {
+      "sensor_id": "MR-KND-002",
+      "name": "Mahaweli River — Peradeniya",
+      "location": {
+        "lat": 7.2520,
+        "lng": 80.5921,
+        "zone_id": "ZONE-K1",
+        "zone_name": "Getambe Basin"
+      },
+      "readings": {
+        "water_level_m": 2.1,
+        "rainfall_mm_per_hr": 0.0,
+        "flow_velocity_mps": 0.42,
+        "temperature_c": 27.8,
+        "air_pressure_hpa": 1012.5
+      },
+      "status": {
+        "device_online": true,
+        "battery_percent": 92,
+        "signal_strength_dbm": -55,
+        "last_seen": "2026-04-22T23:00:05Z"
+      },
+      "thresholds": {
+        "water_level_warning_m": 3.5,
+        "water_level_critical_m": 5.0
+      }
+    }
+  ]
+}
+
+20. GET /api/v1/zones/{zone_id}/alerts
+Returns all active alerts scoped to a zone. Mirrors the schema of /api/v1/alerts but filtered.
+Supported Query Parameters:
+
+?status=ACTIVE — filter by alert status
+?severity=HIGH,CRITICAL — filter by severity level
+
+json{
+  "status": "success",
+  "zone_id": "ZONE-K1",
+  "zone_name": "Getambe Basin",
+  "count": 1,
+  "data": [
+    {
+      "alert_id": "ALT-KND-001",
+      "zone_id": "ZONE-K1",
+      "zone_name": "Getambe Basin",
+      "source_prediction_id": "PRED-KND-001",
+      "severity": "HIGH",
+      "severity_code": 3,
+      "title": "Evacuation Warning: Getambe Lowlands",
+      "message": "Water levels are rising rapidly. Please evacuate to the nearest designated shelter immediately.",
+      "triggered_at": "2026-04-25T20:00:00Z",
+      "triggered_by": "XGBOOST_AUTOMATED",
+      "status": "ACTIVE",
+      "resolved_at": null,
+      "affected_population": 12500,
+      "recommended_action": "EVACUATE",
+      "recommended_shelters": [
+        {
+          "shelter_id": "SH-K001",
+          "name": "Getambe Temple Hall",
+          "lat": 7.2715,
+          "lng": 80.6125
+        }
+      ],
+      "notifications_sent": {
+        "push": 1200,
+        "sms": 800,
+        "email": 50
+      }
+    }
+  ]
+}
+
+21. GET /api/v1/zones/{zone_id}/predictions
+Returns flood predictions scoped to a zone. Mirrors /api/v1/predictions but zone-locked.
+Supported Query Parameters:
+
+?severity=HIGH,CRITICAL
+?timeframe=next_24h
+
+json{
+  "status": "success",
+  "zone_id": "ZONE-K1",
+  "zone_name": "Getambe Basin",
+  "count": 1,
+  "data": [
+    {
+      "prediction_id": "PRED-KND-001",
+      "zone_id": "ZONE-K1",
+      "zone_name": "Getambe Basin",
+      "created_at": "2026-04-25T19:30:00Z",
+      "prediction_window": {
+        "from": "2026-04-25T20:00:00Z",
+        "to": "2026-04-26T08:00:00Z"
+      },
+      "flood_probability_percent": 82.3,
+      "predicted_peak_level_m": 4.8,
+      "estimated_flood_time": "2026-04-25T23:45:00Z",
+      "severity": "HIGH",
+      "confidence_percent": 87.1,
+      "model_version": "XGB-v1.0",
+      "top_risk_factors": [
+        {
+          "factor": "Upstream Water Level",
+          "value": "3.9m",
+          "impact": "High"
+        },
+        {
+          "factor": "Rainfall (Last 6h)",
+          "value": "145.2mm",
+          "impact": "High"
+        },
+        {
+          "factor": "Flow Velocity",
+          "value": "0.95 m/s",
+          "impact": "Medium"
+        }
+      ]
+    }
+  ]
+}
+
+22. GET /api/v1/zones/{zone_id}/anomalies
+Returns anomalies detected by sensors within the zone. Mirrors /api/v1/anomalies but zone-scoped.
+Supported Query Parameters:
+
+?status=UNRESOLVED
+?severity=HIGH
+
+json{
+  "status": "success",
+  "zone_id": "ZONE-K1",
+  "zone_name": "Getambe Basin",
+  "count": 1,
+  "data": [
+    {
+      "anomaly_id": "ANM-KND-042",
+      "sensor_id": "MR-KND-001",
+      "zone_id": "ZONE-K1",
+      "detected_at": "2026-04-25T20:45:00Z",
+      "type": "SUDDEN_SPIKE",
+      "description": "Water level rose 0.8m in 10 mins without corresponding rainfall.",
+      "severity": "HIGH",
+      "anomaly_score": 0.94,
+      "reading_at_detection": {
+        "water_level_m": 4.2,
+        "rate_of_change_m_per_hr": 4.8
+      },
+      "expected_range": {
+        "min_m": 1.5,
+        "max_m": 2.8
+      },
+      "status": "UNRESOLVED",
+      "auto_alert_triggered": true,
+      "alert_id": "ALT-KND-001"
+    }
+  ]
+}
+
+23. POST /api/v1/location/resolve
+Accepts a GPS coordinate and returns the zone the user is currently inside, determined by a PostGIS point-in-polygon query on the backend.
+
+Request Body:
+json{
+  "lat": 7.2721,
+  "lng": 80.6132
+}
+Response:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T01:22:00Z",
+  "coordinates": {
+    "lat": 7.2721,
+    "lng": 80.6132
+  },
+  "zone": {
+    "zone_id": "ZONE-K1",
+    "zone_name": "Getambe Basin",
+    "risk_level": "HIGH",
+    "risk_score": 78.4,
+    "color_code": "#F97316",
+    "active_alerts": 2
+  }
+}
+If the coordinate falls outside all monitored zones:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T01:22:00Z",
+  "coordinates": {
+    "lat": 6.9271,
+    "lng": 79.8612
+  },
+  "zone": null,
+  "message": "Coordinates do not fall within any monitored flood zone."
+}
