@@ -3,7 +3,7 @@
    Global CSS Custom Properties & Reset
    ============================================= */
 
-/* === Google Fonts are loaded via next/font in layout.tsx === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 /* ---- CSS Reset ---- */
 *,
@@ -15,7 +15,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -56,6 +56,11 @@ table {
 
 /* ---- Design System Tokens ---- */
 :root {
+  --font-inter: 'Inter', sans-serif;
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-ui: var(--font-inter);
+  
   /* Surface Hierarchy (tonal layering — NO borders) */
   --bg-base: #0b1326;
   --bg-surface-low: #131b2e;
