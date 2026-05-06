@@ -9,7 +9,6 @@ import styles from './page.module.css';
 export default function LiveMapPage() {
   const zones = useZoneStore((s) => s.zones);
   const { selectedZoneId, selectZone } = useMapStore();
-
   const totalPopulation = zones.reduce((s, z) => s + (z.population_at_risk || 0), 0);
 
   return (
