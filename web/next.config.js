@@ -34,6 +34,14 @@ const nextConfig = {
       ],
     },
   ],
+  async rewrites() {
+    return [
+      {
+        source: '/api-proxy/:path*',
+        destination: 'http://157.245.102.69/:path*' // Proxy to Digital Ocean backend
+      }
+    ]
+  }
 };
 
 module.exports = nextConfig;
