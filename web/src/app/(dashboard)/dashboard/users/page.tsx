@@ -19,7 +19,7 @@ import RoleGate from '@/components/auth/RoleGate';
 import StatCard from '@/components/ui/StatCard';
 import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
-import type { User, UserRole, Zone } from '@/lib/types';
+import type { User, UserRole, Zone, ApiResponse } from '@/lib/types';
 import styles from './page.module.css';
 
 export default function UsersPage() {
@@ -53,7 +53,7 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await api.admin.users.list();
+      const res = (await api.admin.users.list()) as ApiResponse<User[]>;
       setUsers(res.data || []);
       setError(null);
     } catch (err) {
@@ -66,7 +66,7 @@ export default function UsersPage() {
 
   const fetchZones = async () => {
     try {
-      const res = await api.zones.list();
+      const res = (await api.zones.list()) as ApiResponse<Zone[]>;
       setZones(res.data || []);
     } catch (err) {
       console.error('Failed to fetch zones:', err);

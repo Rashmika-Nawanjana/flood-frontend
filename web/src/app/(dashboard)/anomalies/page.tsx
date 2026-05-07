@@ -98,7 +98,7 @@ export default function AnomaliesPage() {
                         <div className={styles.expandedLeft}>
                           <h4 className={styles.expandedTitle}>Detailed Analysis</h4>
                           <p className={styles.expandedDesc}>{a.description}</p>
-                          <RoleGate allowed={['admin', 'officer']}>
+                          <RoleGate allowed={['admin', 'field_officer']}>
                             <div className={styles.expandedActions}>
                               <button className={styles.resolveBtn} onClick={() => handleResolve(a.anomaly_id, 'Issue resolved')}>Mark as Resolved</button>
                               <button className={styles.actionBtn} onClick={() => handleResolve(a.anomaly_id, 'False alarm')}>False Alarm</button>

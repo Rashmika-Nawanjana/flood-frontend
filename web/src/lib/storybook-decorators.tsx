@@ -14,7 +14,7 @@ import type { UserRole } from '@/lib/types';
 export const withAuthRole = (role: UserRole) => {
   const WithAuthRole = (Story: React.FC) => {
     useAuthStore.setState({
-      user: { id: 'mock-1', name: 'Mock User', email: 'mock@example.com', role },
+      user: { id: 'mock-1', name: 'Mock User', email: 'mock@example.com', role, zone_id: null },
       isAuthenticated: true,
     });
     return <Story />;
