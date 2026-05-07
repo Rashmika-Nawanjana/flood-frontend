@@ -1,11 +1,17 @@
 import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:flood_frontend/screens/home.dart';
 import 'package:flood_frontend/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  Clerk.initialize(
-    publishableKey: 'your-clerk-publishable-key', // Replace with your Clerk publishable key
+
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Clerk.initialize(
+    publishableKey: 'pk_test_xxxxxxxxxxxxxxxxx',
   );
+
   runApp(const MyApp());
 }
 
@@ -30,6 +36,15 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
+
+      routes: {
+
+        '/home': (context) =>
+            const HomeScreen(
+              locationIdentifier: "USE_GPS_LOCATION",
+            ),
+      },
+
       home: const SignInScreen(),
     );
   }

@@ -1,21 +1,25 @@
 import 'dart:convert';
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:http/http.dart' as http;
 class ApiService {
-  static const String devBaseUrl = 'http://0.0.0.0:8000';
+  static const String devBaseUrl = 'http://10.0.2.2:8000';
   static const String stagingBaseUrl = 'https://api-stg.example.com';
   static const String prodBaseUrl = 'https://api.example.com';
 
+static Future<Map<String, String>> getHeaders() async {
+  final token = await Clerk.instance.session?.getToken();
 
-  static Map<String, String> get _headers => {
-        'Authorization': 'Bearer ${clerkToken}',
-        'Content-Type': 'application/json',
-      };
-
+  return {
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json',
+  };
+}
   // ZONES 
   /// Fetch all monitoring zones
   static Future<List<dynamic>> getZones() async {
     try {
-      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones"), headers: _headers);
+      final headers = await getHeaders();
+      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones"), headers: headers);
 
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
@@ -29,7 +33,8 @@ class ApiService {
   /// Get details for a specific zone
   static Future<Map<String, dynamic>?> getZone(String zoneId) async {
     try {
-      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones/$zoneId"), headers: _headers);
+      final headers = await getHeaders();
+      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones/$zoneId"), headers: headers);
 
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
@@ -55,7 +60,8 @@ class ApiService {
 
     final uri = Uri.parse("$devBaseUrl/api/v1/alerts").replace(queryParameters: queryParams);
     try {
-      final res = await http.get(uri, headers: _headers);
+      final headers = await getHeaders();
+      final res = await http.get(uri, headers: headers);
 
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
@@ -75,7 +81,8 @@ class ApiService {
       },
     );
     try {
-      final res = await http.get(uri, headers: _headers);
+      final headers = await getHeaders();
+      final res = await http.get(uri, headers: headers);
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
       }
@@ -100,7 +107,7 @@ class ApiService {
 
       final res = await http.post(
         Uri.parse("$devBaseUrl/api/v1/location/resolve"),
-        headers: _headers,
+        headers: await getHeaders(),
         body: jsonEncode(body),
       );
 

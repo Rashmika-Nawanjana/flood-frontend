@@ -113,6 +113,24 @@ List<Map<String, dynamic>> _get3DayFloodSeverity() {
 
   return days;
 }
+Future<void> _handleLocationPermission() async {
+
+  LocationPermission permission;
+
+  permission = await Geolocator.checkPermission();
+
+  if (permission == LocationPermission.denied) {
+
+    permission = await Geolocator.requestPermission();
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+
+    throw Exception(
+      "Location permissions are permanently denied.",
+    );
+  }
+}
 
   // ─────────────────────────────
   // FETCH DATA
@@ -122,6 +140,7 @@ List<Map<String, dynamic>> _get3DayFloodSeverity() {
     try {
       // 1. LOCATION RESOLVE
       if (widget.locationIdentifier == "USE_GPS_LOCATION") {
+        await _handleLocationPermission();
         Position pos = await Geolocator.getCurrentPosition();
 
         final zone =
