@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import RiskBadge from '@/components/ui/RiskBadge';
+import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import type { Prediction, ApiResponse } from '@/lib/types';
 import styles from './page.module.css';
@@ -11,15 +12,18 @@ export default function PredictionsPage() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { user, isAuthenticated } = useAuthStore();
+
   const fetchPredictions = () => {
+    if (!isAuthenticated || !user || !user.zone_id) return;
     setLoading(true);
-    api.predictions.list().then((res) => {
+    api.predictions.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Prediction[]>;
       setPredictions(d.data || []);
     }).catch(console.error).finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchPredictions(); }, []);
+  useEffect(() => { fetchPredictions(); }, [isAuthenticated, user]);
 
   return (
     <div className={styles.page}>

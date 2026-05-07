@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "mapbox": "^1.0.0-beta10",
-    "mapbox-gl": "^3.23.1"
-  }
-}

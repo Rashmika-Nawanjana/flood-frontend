@@ -8,68 +8,29 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 24px 0 0; /* Removed left padding to allow brand to align to screen edge */
   z-index: 100;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 200px;
-}
-
-.brandIcon {
-  flex-shrink: 0;
-}
-
-.brandText {
-  font-family: var(--font-ui);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--primary);
-  letter-spacing: -0.02em;
-}
-
-/* Search */
-.searchContainer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--bg-surface-low);
-  border-radius: var(--radius);
-  padding: 8px 16px;
-  width: 400px;
-  max-width: 40%;
-}
-
-.searchIcon {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.searchInput {
-  width: 100%;
-  font-size: 14px;
-  color: var(--text-primary);
-  background: transparent;
-}
-
-.searchInput::placeholder {
-  color: var(--text-muted);
-}
-
-/* Actions */
-.actions {
-  display: flex;
-  align-items: center;
   gap: 16px;
-  min-width: 200px;
-  justify-content: flex-end;
+  width: var(--sidebar-width); /* Use the same variable as sidebar */
+  min-width: var(--sidebar-width);
+  padding-left: 24px; /* Default padding for brand */
+  transition: all var(--transition-normal);
 }
 
-.iconButton {
-  position: relative;
+.collapsed .brand {
+  min-width: 72px;
+  width: 72px;
+  padding-left: 0;
+  gap: 0;
+  justify-content: center;
+}
+
+.menuToggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,20 +41,56 @@
   transition: all var(--transition-fast);
 }
 
-.iconButton:hover {
+.collapsed .menuToggle {
+  margin-left: 0;
+}
+
+.menuToggle:hover {
   color: var(--text-primary);
   background-color: var(--bg-surface-high);
 }
 
-.notifDot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--risk-critical);
+.brandIcon {
+  flex-shrink: 0;
+  transition: all var(--transition-normal);
 }
+
+.collapsed .brandIcon {
+  width: 0;
+  opacity: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.brandText {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  transition: all var(--transition-normal);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.collapsed .brandText {
+  width: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+
 
 .userInfo {
   display: flex;

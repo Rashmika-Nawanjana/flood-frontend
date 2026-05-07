@@ -40,6 +40,18 @@
   gap: 16px;
 }
 
+.row2 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 16px;
+}
+
 /* Card */
 .card {
   background-color: var(--bg-surface);
@@ -186,4 +198,82 @@
   height: 8px;
   border-radius: 50%;
   background-color: var(--risk-low);
+}
+
+/* Stat Card Extras (Breakdowns, Progress, Pills) */
+.breakdownGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.breakdownBox {
+  background-color: var(--bg-surface-low);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breakdownLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.breakdownValue {
+  font-family: var(--font-jetbrains-mono);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.uptimeText {
+  color: var(--risk-low);
+  font-weight: 600;
+}
+
+.offlineText {
+  color: var(--text-muted);
+}
+
+.progressBarContainer {
+  height: 4px;
+  background-color: var(--bg-surface-highest);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: var(--risk-low);
+  transition: width var(--transition-slow);
+}
+
+.pillGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

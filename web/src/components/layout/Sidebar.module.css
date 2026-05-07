@@ -9,6 +9,11 @@
   flex-direction: column;
   z-index: 90;
   overflow-y: auto;
+  transition: width var(--transition-normal);
+}
+
+.collapsed {
+  width: 72px;
 }
 
 .nav {
@@ -42,6 +47,14 @@
   border-left: 3px solid transparent;
   transition: all var(--transition-fast);
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.collapsed .navItem {
+  padding: 12px 0;
+  justify-content: center;
+  gap: 0;
 }
 
 .navItem:hover {

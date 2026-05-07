@@ -1,3 +1,7 @@
+.layoutWrapper {
+  min-height: 100vh;
+}
+
 .main {
   margin-left: var(--sidebar-width);
   margin-top: var(--topbar-height);
@@ -5,4 +9,5 @@
   padding: 32px;
   padding-bottom: calc(var(--footer-height) + 32px);
   background-color: var(--bg-base);
+  transition: margin-left var(--transition-normal);
 }
