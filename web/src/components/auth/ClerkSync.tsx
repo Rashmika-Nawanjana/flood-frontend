@@ -19,10 +19,10 @@ export function ClerkSync() {
     if (!isLoaded) return;
 
     if (user) {
-      const role = (user.publicMetadata?.role as UserRole) || 'officer';
+      const role = (user.publicMetadata?.role as UserRole) || 'citizen';
       
       const syncUser = async () => {
-        let zone_id = 'ALL';
+        let zone_id: string | null = null;
         if (role !== 'admin') {
           try {
             const res = await api.users.getZone(user.id);

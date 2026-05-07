@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUIStore } from '@/store/useUIStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard,
   Map,
@@ -15,6 +16,7 @@ import {
   Layers,
   Building2,
   Settings,
+  Users,
 } from 'lucide-react';
 import { NAV_ITEMS, SETTINGS_NAV } from '@/lib/constants';
 import styles from './Sidebar.module.css';
@@ -30,6 +32,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Layers,
   Building2,
   Settings,
+  Users,
 };
 
 export default function Sidebar() {
@@ -45,11 +48,16 @@ export default function Sidebar() {
     if (currentItem) setActiveNavItem(currentItem.label);
   }, [pathname, setActiveNavItem]);
 
+  const { user } = useAuthStore();
+
   return (
     <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {NAV_ITEMS.map((item) => {
+            // Role-based visibility
+            if (item.label === 'Users' && user?.role !== 'admin') return null;
+            
             const Icon = ICON_MAP[item.icon];
             const active = activeNavItem === item.label;
             return (

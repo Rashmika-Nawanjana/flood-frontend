@@ -18,7 +18,8 @@ export default function AlertsPage() {
   const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated || !user || !user.zone_id) return;
+    if (!isAuthenticated || !user) return;
+    if (user.role !== 'admin' && !user.zone_id) return;
     api.alerts.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Alert[]>;
       setAlerts(d.data || []);

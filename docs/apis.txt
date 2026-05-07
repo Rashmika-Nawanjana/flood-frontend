@@ -764,3 +764,101 @@ The response zone object mirrors the same shape used in endpoint 23's response f
 The helpful message on the null case points consumers directly to the resolution flow, which saves confusion during integration.
 
 On the frontend, this is the call your useAuthStore should fire on login — after Keycloak resolves the session and you have the clerk_id, hit this endpoint to rehydrate the user's zone into Zustand state immediately, before any alert or map components mount.
+
+
+25. POST /api/admin/users
+Request:
+json{
+  "full_name": "Kasun Perera",
+  "email": "kasun@floodsense.lk",
+  "password": "SecurePass123!",
+  "role": "field_officer",
+  "zone_id": "ZONE-K1"
+}
+Response:
+json{
+  "status": "success",
+  "message": "User kasun@floodsense.lk has been successfully created.",
+  "data": {
+    "clerk_id": "user_2abc123xyz",
+    "full_name": "Kasun Perera",
+    "email": "kasun@floodsense.lk",
+    "role": "field_officer",
+    "zone_id": "ZONE-K1",
+    "is_active": true,
+    "created_at": "2026-04-26T01:00:00Z"
+  }
+}
+
+26. GET /api/admin/users
+Response:
+json{
+  "status": "success",
+  "count": 3,
+  "data": [
+    {
+      "clerk_id": "user_2abc123xyz",
+      "full_name": "Kasun Perera",
+      "email": "kasun@floodsense.lk",
+      "role": "field_officer",
+      "zone_id": "ZONE-K1",
+      "is_active": true,
+      "created_at": "2026-04-26T01:00:00Z",
+      "updated_at": "2026-04-26T01:00:00Z"
+    },
+    {
+      "clerk_id": "user_3def456uvw",
+      "full_name": "Amara Silva",
+      "email": "amara@floodsense.lk",
+      "role": "admin",
+      "zone_id": null,
+      "is_active": true,
+      "created_at": "2026-04-20T09:00:00Z",
+      "updated_at": "2026-04-20T09:00:00Z"
+    },
+    {
+      "clerk_id": "user_4ghi789rst",
+      "full_name": "Nimal Fernando",
+      "email": "nimal@gmail.com",
+      "role": "citizen",
+      "zone_id": null,
+      "is_active": true,
+      "created_at": "2026-04-22T14:00:00Z",
+      "updated_at": "2026-04-22T14:00:00Z"
+    }
+  ]
+}
+
+27. PATCH /api/admin/users/{clerk_id}
+Request:
+json{
+  "full_name": "Kasun Bandara",
+  "role": "field_officer",
+  "zone_id": "ZONE-K2"
+}
+Response:
+json{
+  "status": "success",
+  "message": "User user_2abc123xyz has been successfully updated.",
+  "data": {
+    "clerk_id": "user_2abc123xyz",
+    "full_name": "Kasun Bandara",
+    "email": "kasun@floodsense.lk",
+    "role": "field_officer",
+    "zone_id": "ZONE-K2",
+    "is_active": true,
+    "updated_at": "2026-04-26T09:00:00Z"
+  }
+}
+
+28. DELETE /api/admin/users/{clerk_id}
+This should be a soft delete (flip is_active = false), consistent with how sensors and zones handle deletion in your system.
+Response:
+json{
+  "status": "success",
+  "message": "User user_2abc123xyz has been successfully deactivated.",
+  "deactivated_at": "2026-04-26T09:30:00Z",
+  "note": "User record preserved in PostgreSQL. is_active set to false. Zone assignment cleared if zone was deleted."
+}
+
+Also worth flagging to your backend teammate — since email lives in both Clerk and Postgres, the POST handler should write to both atomically. If the Clerk call succeeds but the Postgres insert fails, Clerk should be rolled back (or the orphaned Clerk user deleted) to avoid the two getting out of sync.

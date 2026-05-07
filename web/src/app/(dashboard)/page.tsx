@@ -35,7 +35,7 @@ export default function DashboardPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const zoneId = user?.zone_id || 'ALL';
+        const zoneId = user?.zone_id ?? null;
 
         // Fetch parallel
         const [sensorsRes, zonesRes, alertsRes, predictionsRes] = await Promise.all([

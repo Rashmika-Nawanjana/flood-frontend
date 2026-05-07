@@ -7,7 +7,7 @@ interface User {
   name: string;
   email: string;
   role: UserRole;
-  zone_id?: string;
+  zone_id: string | null;
 }
 
 interface AuthState {

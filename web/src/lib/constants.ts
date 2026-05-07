@@ -13,6 +13,7 @@ export const NAV_ITEMS = [
   { label: 'Anomalies', href: '/anomalies', icon: 'AlertTriangle' },
   { label: 'Zones', href: '/zones', icon: 'Layers' },
   { label: 'Shelters', href: '/shelters', icon: 'Building2' },
+  { label: 'Users', href: '/dashboard/users', icon: 'Users' },
 ] as const;
 
 export const SETTINGS_NAV = {

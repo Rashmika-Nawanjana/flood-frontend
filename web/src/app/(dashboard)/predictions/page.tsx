@@ -15,7 +15,8 @@ export default function PredictionsPage() {
   const { user, isAuthenticated } = useAuthStore();
 
   const fetchPredictions = useCallback(() => {
-    if (!isAuthenticated || !user || !user.zone_id) return;
+    if (!isAuthenticated || !user) return;
+    if (user.role !== 'admin' && !user.zone_id) return;
     setLoading(true);
     api.predictions.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Prediction[]>;
