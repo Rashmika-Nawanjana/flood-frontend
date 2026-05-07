@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
+import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import type { Alert, ApiResponse } from '@/lib/types';
 import styles from './page.module.css';
@@ -14,12 +15,15 @@ export default function AlertsPage() {
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
+  const { user, isAuthenticated } = useAuthStore();
+
   useEffect(() => {
-    api.alerts.list().then((res) => {
+    if (!isAuthenticated || !user || !user.zone_id) return;
+    api.alerts.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Alert[]>;
       setAlerts(d.data || []);
     }).catch(console.error);
-  }, []);
+  }, [isAuthenticated, user]);
 
   const filtered = alerts.filter((a) => {
     if (filterSeverity !== 'ALL' && a.severity !== filterSeverity) return false;

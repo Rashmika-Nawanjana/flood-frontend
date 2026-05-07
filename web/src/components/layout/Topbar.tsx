@@ -1,19 +1,21 @@
 'use client';
-
-import { Bell, Search } from 'lucide-react';
+ 
+import { Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ProfileDropdown from './ProfileDropdown';
 import styles from './Topbar.module.css';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUIStore } from '@/store/useUIStore';
 
 export default function Topbar() {
   const [isMounted, setIsMounted] = useState(false);
   const user = useAuthStore((state) => state.user);
-
+  const { isSidebarCollapsed, toggleSidebarCollapse } = useUIStore();
+ 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
+ 
   if (!isMounted) {
     return (
       <header className={styles.topbar}>
@@ -47,23 +49,16 @@ export default function Topbar() {
             />
           </svg>
           <span className={styles.brandText}>FloodSense LK</span>
-        </div>
-
-        <div className={styles.searchContainer}>
-          <Search size={16} className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search systems..."
-            className={styles.searchInput}
-          />
-        </div>
-
-        <div className={styles.actions}>
-          <button className={styles.iconButton} aria-label="Notifications">
-            <Bell size={20} />
-            <span className={styles.notifDot} />
+          <button className={styles.menuToggle} aria-label="Toggle Sidebar">
+            <Menu size={20} />
           </button>
+        </div>
+ 
 
+ 
+        <div className={styles.actions}>
+
+ 
           <div className={styles.userInfo}>
             <div className={styles.avatar}>--</div>
             <span className={styles.userName}>Loading...</span>
@@ -72,9 +67,9 @@ export default function Topbar() {
       </header>
     );
   }
-
+ 
   return (
-    <header className={styles.topbar}>
+    <header className={`${styles.topbar} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <div className={styles.brand}>
         <svg
           width="28"
@@ -105,23 +100,20 @@ export default function Topbar() {
           />
         </svg>
         <span className={styles.brandText}>FloodSense LK</span>
-      </div>
-
-      <div className={styles.searchContainer}>
-        <Search size={16} className={styles.searchIcon} />
-        <input
-          type="text"
-          placeholder="Search systems..."
-          className={styles.searchInput}
-        />
-      </div>
-
-      <div className={styles.actions}>
-        <button className={styles.iconButton} aria-label="Notifications">
-          <Bell size={20} />
-          <span className={styles.notifDot} />
+        <button 
+          className={styles.menuToggle} 
+          onClick={toggleSidebarCollapse}
+          aria-label="Toggle Sidebar"
+        >
+          <Menu size={20} />
         </button>
+      </div>
+ 
 
+ 
+      <div className={styles.actions}>
+
+ 
         {user ? (
           <ProfileDropdown
             userName={user.name}

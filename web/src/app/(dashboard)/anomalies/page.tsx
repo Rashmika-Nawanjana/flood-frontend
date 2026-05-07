@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
+import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import { ANOMALY_TYPES } from '@/lib/constants';
 import type { Anomaly, ApiResponse } from '@/lib/types';
@@ -14,12 +15,15 @@ export default function AnomaliesPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  const { user, isAuthenticated } = useAuthStore();
+
   useEffect(() => {
-    api.anomalies.list().then((res) => {
+    if (!isAuthenticated || !user || !user.zone_id) return;
+    api.anomalies.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Anomaly[]>;
       setAnomalies(d.data || []);
     }).catch(console.error);
-  }, []);
+  }, [isAuthenticated, user]);
 
   const unresolved = anomalies.filter(a => a.status === 'UNRESOLVED').length;
   const autoAlerted = anomalies.filter(a => a.auto_alert_triggered).length;

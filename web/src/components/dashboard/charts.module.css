@@ -1,0 +1,167 @@
+.chartContainer {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chartHeader {
+  margin-bottom: 20px;
+}
+
+.chartTitle {
+  font-family: var(--font-space-grotesk);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chartBody {
+  flex: 1;
+  min-height: 250px;
+}
+
+/* XAI Custom UI */
+.xaiList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.xaiItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xaiLabel {
+  font-size: 14px;
+  color: var(--text-primary);
+  width: 120px;
+}
+
+.xaiBarContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.xaiBarBg {
+  height: 6px;
+  background-color: var(--bg-surface-highest);
+  border-radius: var(--radius-pill);
+  flex: 1;
+  overflow: hidden;
+}
+
+.xaiBarFill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+
+.xaiValue {
+  font-family: var(--font-jetbrains-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  width: 60px;
+  text-align: right;
+}
+
+.xaiFooter {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.modelName {
+  color: var(--text-muted);
+}
+
+.confidence {
+  color: var(--risk-low);
+  font-weight: 600;
+}
+
+/* Next Predicted Flood UI */
+.countdownCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.predictionZone {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.imminentText {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--risk-critical);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.estimatedLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.statBox {
+  flex: 1;
+  background-color: var(--bg-surface-low);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.statValue.red {
+  color: var(--risk-critical);
+}
+
+.statValue.yellow {
+  color: var(--risk-warning);
+}
+
+.thresholds {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 16px;
+}

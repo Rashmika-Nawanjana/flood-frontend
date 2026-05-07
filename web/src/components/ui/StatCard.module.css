@@ -69,3 +69,8 @@
   color: var(--text-muted);
   opacity: 0.5;
 }
+
+.extra {
+  margin-top: 12px;
+  width: 100%;
+}

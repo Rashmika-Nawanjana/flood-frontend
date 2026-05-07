@@ -7,6 +7,7 @@ interface StatCardProps {
   accentColor?: string;
   icon?: React.ReactNode;
   trend?: { value: string; direction: 'up' | 'down' };
+  children?: React.ReactNode;
 }
 
 export default function StatCard({
@@ -16,6 +17,7 @@ export default function StatCard({
   accentColor = 'var(--primary)',
   icon,
   trend,
+  children,
 }: StatCardProps) {
   return (
     <div className={styles.card} style={{ '--accent': accentColor } as React.CSSProperties}>
@@ -39,6 +41,7 @@ export default function StatCard({
           )}
         </div>
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+        {children && <div className={styles.extra}>{children}</div>}
       </div>
       {icon && <div className={styles.icon}>{icon}</div>}
     </div>

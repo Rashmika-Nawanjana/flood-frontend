@@ -485,7 +485,7 @@ JSON
   "resolved_by": "TECH-04"
 }
 
-19. GET /api/v1/zones/{zone_id}/sensors
+19. GET /api/v1/sensors/zone/{zone_id}/
 Returns all sensors belonging to a specific zone.
 json{
   "status": "success",
@@ -645,7 +645,7 @@ json{
   ]
 }
 
-22. GET /api/v1/zones/{zone_id}/anomalies
+22. GET /api/v1/anomalies/{zone_id}/
 Returns anomalies detected by sensors within the zone. Mirrors /api/v1/anomalies but zone-scoped.
 Supported Query Parameters:
 
@@ -683,14 +683,15 @@ json{
 }
 
 23. POST /api/v1/location/resolve
-Accepts a GPS coordinate and returns the zone the user is currently inside, determined by a PostGIS point-in-polygon query on the backend.
-
+Accepts a GPS coordinate and an optional clerk_id and returns the zone the user is currently inside, determined by a PostGIS point-in-polygon query. When clerk_id is provided, the backend additionally updates user_table.zone_id for that user record.
 Request Body:
 json{
   "lat": 7.2721,
-  "lng": 80.6132
+  "lng": 80.6132,
+  "clerk_id": "user_2abc123xyz"
 }
-Response:
+
+Response — coordinate falls inside a monitored zone:
 json{
   "status": "success",
   "timestamp": "2026-04-26T01:22:00Z",
@@ -705,9 +706,10 @@ json{
     "risk_score": 78.4,
     "color_code": "#F97316",
     "active_alerts": 2
-  }
+  },
+  "user_zone_updated": true
 }
-If the coordinate falls outside all monitored zones:
+Response — coordinate outside all monitored zones:
 json{
   "status": "success",
   "timestamp": "2026-04-26T01:22:00Z",
@@ -716,5 +718,49 @@ json{
     "lng": 79.8612
   },
   "zone": null,
-  "message": "Coordinates do not fall within any monitored flood zone."
+  "message": "Coordinates do not fall within any monitored flood zone.",
+  "user_zone_updated": false
 }
+
+Notes on the two additions:
+
+clerk_id in the request body — the backend uses this to run UPDATE user_table SET zone_id = $resolvedZoneId WHERE clerk_id = $clerkId after the PostGIS lookup. If zone is null (outside all zones), the backend should leave user_table.zone_id unchanged and return user_zone_updated: false.
+user_zone_updated in the response — a boolean echo so the frontend knows whether the DB write was attempted and succeeded. Useful for the citizen mobile app to confirm the profile update without a separate round-trip to a user profile endpoint.
+
+On the frontend side (your useAuthStore), after a successful call where user_zone_updated: true, you'll want to sync the resolved zone into local Zustand state so components that depend on the user's zone (alert banners, shelter routing) re-render immediately without waiting for the next auth token refresh.
+
+
+24. GET /api/v1/users/{clerk_id}/zone
+Returns the flood zone currently associated with a user record, looked up by their Clerk ID.
+Request: No body required — clerk_id is passed as a path parameter.
+GET /api/v1/users/user_2abc123xyz/zone
+Response — user has an assigned zone:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T02:10:00Z",
+  "clerk_id": "user_2abc123xyz",
+  "zone": {
+    "zone_id": "ZONE-K1",
+    "zone_name": "Getambe Basin",
+    "risk_level": "HIGH",
+    "risk_score": 78.4,
+    "color_code": "#F97316",
+    "active_alerts": 2
+  }
+}
+Response — user exists but has no zone assigned yet:
+json{
+  "status": "success",
+  "timestamp": "2026-04-26T02:10:00Z",
+  "clerk_id": "user_2abc123xyz",
+  "zone": null,
+  "message": "No zone assigned. Call POST /api/v1/location/resolve with clerk_id to set one."
+}
+
+Notes:
+
+GET with a path param is the right shape here — there's no body to send, and the clerk_id is an identifier, not a filter, so it belongs in the path rather than as a query param.
+The response zone object mirrors the same shape used in endpoint 23's response for consistency — same fields, same names, so your frontend can handle both with a single type.
+The helpful message on the null case points consumers directly to the resolution flow, which saves confusion during integration.
+
+On the frontend, this is the call your useAuthStore should fire on login — after Keycloak resolves the session and you have the clerk_id, hit this endpoint to rehydrate the user's zone into Zustand state immediately, before any alert or map components mount.

@@ -73,8 +73,12 @@ async function mutate<T>(
 
 // ---- Public API ----
 export const api = {
+  users: {
+    getZone: (clerkId: string) => fetcher<{ data: { zone_id: string } }>(`/users/${clerkId}/zone`),
+  },
+
   sensors: {
-    list: () => fetcher("/sensors"),
+    list: (zoneId?: string) => zoneId && zoneId !== "ALL" ? fetcher(`/sensors/zone/${zoneId}/`) : fetcher("/sensors"),
     get: (id: string) => fetcher(`/sensors/${id}`),
     history: (
       id: string,
@@ -87,7 +91,14 @@ export const api = {
   },
 
   zones: {
-    list: () => fetcher("/zones"),
+    list: async (zoneId?: string) => {
+      if (zoneId && zoneId !== "ALL") {
+        const res = await fetcher<{ data: any }>(`/zones/${zoneId}`);
+        // Wrap the single zone in an array to match the /zones response signature
+        return { ...res, data: res.data ? [res.data] : [] };
+      }
+      return fetcher("/zones");
+    },
     get: (id: string) => fetcher(`/zones/${id}`),
     create: (data: unknown) => mutate("POST", "/admin/zones", data),
     update: (id: string, data: unknown) =>
@@ -103,8 +114,10 @@ export const api = {
   },
 
   alerts: {
-    list: (params?: { severity?: string; status?: string; zone_id?: string }) =>
-      fetcher("/alerts", params as Record<string, string>),
+    list: (params?: { severity?: string; status?: string; zone_id?: string }, zoneId?: string) =>
+      zoneId && zoneId !== "ALL"
+        ? fetcher(`/zones/${zoneId}/alerts`, params as Record<string, string>)
+        : fetcher("/alerts", params as Record<string, string>),
   },
 
   predictions: {
@@ -112,12 +125,17 @@ export const api = {
       severity?: string;
       zone_id?: string;
       timeframe?: string;
-    }) => fetcher("/predictions", params as Record<string, string>),
+    }, zoneId?: string) =>
+      zoneId && zoneId !== "ALL"
+        ? fetcher(`/zones/${zoneId}/predictions`, params as Record<string, string>)
+        : fetcher("/predictions", params as Record<string, string>),
   },
 
   anomalies: {
-    list: (params?: { status?: string; sensor_id?: string }) =>
-      fetcher("/anomalies", params as Record<string, string>),
+    list: (params?: { status?: string; sensor_id?: string }, zoneId?: string) =>
+      zoneId && zoneId !== "ALL"
+        ? fetcher(`/zones/${zoneId}/anomalies`, params as Record<string, string>)
+        : fetcher("/anomalies", params as Record<string, string>),
     resolve: (
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },

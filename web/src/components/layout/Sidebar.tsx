@@ -35,7 +35,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const { activeNavItem, setActiveNavItem } = useUIStore();
+  const { activeNavItem, setActiveNavItem, isSidebarCollapsed } = useUIStore();
 
   useEffect(() => {
     // Sync pathname to store on initial load if needed
@@ -46,7 +46,7 @@ export default function Sidebar() {
   }, [pathname, setActiveNavItem]);
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {NAV_ITEMS.map((item) => {
@@ -58,9 +58,10 @@ export default function Sidebar() {
                   href={item.href}
                   className={`${styles.navItem} ${active ? styles.active : ''}`}
                   onClick={() => setActiveNavItem(item.label)}
+                  title={isSidebarCollapsed ? item.label : ''}
                 >
                   <Icon size={20} strokeWidth={1.8} />
-                  <span>{item.label}</span>
+                  {!isSidebarCollapsed && <span>{item.label}</span>}
                 </Link>
               </li>
             );
@@ -73,9 +74,10 @@ export default function Sidebar() {
           href={SETTINGS_NAV.href}
           className={`${styles.navItem} ${activeNavItem === SETTINGS_NAV.label ? styles.active : ''}`}
           onClick={() => setActiveNavItem(SETTINGS_NAV.label)}
+          title={isSidebarCollapsed ? SETTINGS_NAV.label : ''}
         >
           <Settings size={20} strokeWidth={1.8} />
-          <span>{SETTINGS_NAV.label}</span>
+          {!isSidebarCollapsed && <span>{SETTINGS_NAV.label}</span>}
         </Link>
       </nav>
     </aside>
