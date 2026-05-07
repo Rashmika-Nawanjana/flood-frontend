@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -14,16 +14,16 @@ export default function PredictionsPage() {
 
   const { user, isAuthenticated } = useAuthStore();
 
-  const fetchPredictions = () => {
+  const fetchPredictions = useCallback(() => {
     if (!isAuthenticated || !user || !user.zone_id) return;
     setLoading(true);
     api.predictions.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Prediction[]>;
       setPredictions(d.data || []);
     }).catch(console.error).finally(() => setLoading(false));
-  };
+  }, [isAuthenticated, user]);
 
-  useEffect(() => { fetchPredictions(); }, [isAuthenticated, user]);
+  useEffect(() => { fetchPredictions(); }, [fetchPredictions]);
 
   return (
     <div className={styles.page}>
