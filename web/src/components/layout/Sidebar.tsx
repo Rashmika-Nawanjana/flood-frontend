@@ -15,6 +15,7 @@ import {
   Layers,
   Building2,
   Settings,
+  Users,
 } from 'lucide-react';
 import { NAV_ITEMS, SETTINGS_NAV } from '@/lib/constants';
 import styles from './Sidebar.module.css';
@@ -30,6 +31,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Layers,
   Building2,
   Settings,
+  Users,
 };
 
 export default function Sidebar() {

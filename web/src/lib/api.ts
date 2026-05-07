@@ -1,7 +1,5 @@
 // =============================================
-// FloodSense LK — Centralized API Client
-// All requests go through the API gateway (URL from env)
-// =============================================
+import type { User } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -140,5 +138,14 @@ export const api = {
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },
     ) => mutate("PATCH", `/admin/anomalies/${id}`, data),
+  },
+
+  admin: {
+    users: {
+      list: () => fetcher<{ data: User[] }>("/admin/users"),
+      create: (data: any) => mutate<any>("POST", "/admin/users", data),
+      update: (clerkId: string, data: any) => mutate<any>("PATCH", `/admin/users/${clerkId}`, data),
+      deactivate: (clerkId: string) => mutate<any>("DELETE", `/admin/users/${clerkId}`),
+    },
   },
 };

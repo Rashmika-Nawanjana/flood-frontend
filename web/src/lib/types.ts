@@ -290,7 +290,18 @@ export interface AnomalyNewEvent {
 }
 
 // ---- Auth ----
-export type UserRole = 'admin' | 'officer';
+export type UserRole = 'admin' | 'field_officer' | 'citizen';
+
+export interface User {
+  clerk_id: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  zone_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface AuthUser {
   id: string;
