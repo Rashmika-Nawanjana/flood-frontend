@@ -78,7 +78,7 @@ export const api = {
   },
 
   sensors: {
-    list: (zoneId?: string) => zoneId && zoneId !== "ALL" ? fetcher(`/sensors/zone/${zoneId}/`) : fetcher("/sensors"),
+    list: (zoneId?: string | null) => zoneId ? fetcher(`/sensors/zone/${zoneId}/`) : fetcher("/sensors"),
     get: (id: string) => fetcher(`/sensors/${id}`),
     history: (
       id: string,
@@ -91,8 +91,8 @@ export const api = {
   },
 
   zones: {
-    list: async (zoneId?: string) => {
-      if (zoneId && zoneId !== "ALL") {
+    list: async (zoneId?: string | null) => {
+      if (zoneId) {
         const res = await fetcher<{ data: any }>(`/zones/${zoneId}`);
         // Wrap the single zone in an array to match the /zones response signature
         return { ...res, data: res.data ? [res.data] : [] };
@@ -114,8 +114,8 @@ export const api = {
   },
 
   alerts: {
-    list: (params?: { severity?: string; status?: string; zone_id?: string }, zoneId?: string) =>
-      zoneId && zoneId !== "ALL"
+    list: (params?: { severity?: string; status?: string; zone_id?: string }, zoneId?: string | null) =>
+      zoneId
         ? fetcher(`/zones/${zoneId}/alerts`, params as Record<string, string>)
         : fetcher("/alerts", params as Record<string, string>),
   },
@@ -125,15 +125,15 @@ export const api = {
       severity?: string;
       zone_id?: string;
       timeframe?: string;
-    }, zoneId?: string) =>
-      zoneId && zoneId !== "ALL"
+    }, zoneId?: string | null) =>
+      zoneId
         ? fetcher(`/zones/${zoneId}/predictions`, params as Record<string, string>)
         : fetcher("/predictions", params as Record<string, string>),
   },
 
   anomalies: {
-    list: (params?: { status?: string; sensor_id?: string }, zoneId?: string) =>
-      zoneId && zoneId !== "ALL"
+    list: (params?: { status?: string; sensor_id?: string }, zoneId?: string | null) =>
+      zoneId
         ? fetcher(`/zones/${zoneId}/anomalies`, params as Record<string, string>)
         : fetcher("/anomalies", params as Record<string, string>),
     resolve: (
