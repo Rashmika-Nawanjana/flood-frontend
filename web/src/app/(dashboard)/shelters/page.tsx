@@ -1,4 +1,5 @@
 'use client';
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { Plus, MoreVertical, Edit2, Trash2, Users, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
@@ -9,10 +10,23 @@ import { api } from '@/lib/api';
 import type { Zone, Shelter } from '@/lib/types';
 import { useShelterStore } from '@/store/useShelterStore';
 import { useZoneStore } from '@/store/useZoneStore';
+=======
+
+import { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import StatCard from '@/components/ui/StatCard';
+import ProgressBar from '@/components/ui/ProgressBar';
+import RoleGate from '@/components/auth/RoleGate';
+import Modal from '@/components/ui/Modal';
+import { api } from '@/lib/api';
+import type { Zone, Shelter, ApiResponse } from '@/lib/types';
+import { useShelterStore } from '@/store/useShelterStore';
+>>>>>>> origin/main
 import styles from './page.module.css';
 
 export default function SheltersPage() {
   const shelters = useShelterStore(s => s.shelters);
+<<<<<<< HEAD
   const addShelter = useShelterStore(s => s.addShelter);
   const updateShelter = useShelterStore(s => s.updateShelter);
   const removeShelter = useShelterStore(s => s.removeShelter);
@@ -102,6 +116,29 @@ export default function SheltersPage() {
       await api.shelters.remove(id);
       removeShelter(id);
       setExpandedId(null);
+=======
+  const [showCreate, setShowCreate] = useState(false);
+  const [formData, setFormData] = useState({ name: '', zone_id: '', capacity: '', contact_number: '' });
+
+  const totalCapacity = shelters.reduce((s, sh) => s + sh.capacity, 0);
+  const totalOccupancy = shelters.reduce((s, sh) => s + (sh.current_occupancy || 0), 0);
+  const fullCount = shelters.filter(s => s.status === 'FULL').length;
+  const openCount = shelters.filter(s => s.status === 'OPEN' || !s.status).length;
+
+  const handleCreate = async () => {
+    try {
+      await api.shelters.create({
+        name: formData.name,
+        zone_id: formData.zone_id,
+        capacity: parseInt(formData.capacity),
+        contact_number: formData.contact_number,
+        lat: 7.27,
+        lng: 80.61,
+        status: 'OPEN',
+      });
+      setShowCreate(false);
+      setFormData({ name: '', zone_id: '', capacity: '', contact_number: '' });
+>>>>>>> origin/main
     } catch (e) { console.error(e); }
   };
 
@@ -113,7 +150,11 @@ export default function SheltersPage() {
           <p className={styles.subtitle}>Strategic coordination of emergency housing and humanitarian resources</p>
         </div>
         <RoleGate allowed={['admin']}>
+<<<<<<< HEAD
           <button className={styles.addBtn} onClick={handleOpenCreate}><Plus size={16} /> Add New Shelter</button>
+=======
+          <button className={styles.addBtn} onClick={() => setShowCreate(true)}><Plus size={16} /> Add New Shelter</button>
+>>>>>>> origin/main
         </RoleGate>
       </div>
 
@@ -124,7 +165,14 @@ export default function SheltersPage() {
         <StatCard label="Total Capacity" value={totalCapacity.toLocaleString()} accentColor="var(--risk-watch)" />
       </div>
 
+<<<<<<< HEAD
 
+=======
+      <div className={styles.capacityBar}>
+        <span className={styles.capacityLabel}>Overall Capacity: {totalOccupancy.toLocaleString()}/{totalCapacity.toLocaleString()}</span>
+        <ProgressBar value={totalOccupancy} max={totalCapacity || 1} height={10} />
+      </div>
+>>>>>>> origin/main
 
       <div className={styles.tableContainer}>
         <table className={styles.table}>
@@ -141,6 +189,7 @@ export default function SheltersPage() {
           </thead>
           <tbody>
             {shelters.map((sh) => (
+<<<<<<< HEAD
               <React.Fragment key={sh.shelter_id}>
                 <tr className={`${styles.row} ${expandedId === sh.shelter_id ? styles.expanded : ''}`} onClick={() => setExpandedId(expandedId === sh.shelter_id ? null : sh.shelter_id)}>
                   <td className={styles.monoCell}>{sh.shelter_id}</td>
@@ -189,6 +238,30 @@ export default function SheltersPage() {
                   </tr>
                 )}
               </React.Fragment>
+=======
+              <tr key={sh.shelter_id} className={styles.row}>
+                <td className={styles.monoCell}>{sh.shelter_id}</td>
+                <td className={styles.shelterName}>{sh.name}</td>
+                <td>{sh.zone_id}</td>
+                <td>
+                  <div className={styles.capacityCell}>
+                    <ProgressBar value={sh.current_occupancy || 0} max={sh.capacity} height={4} showLabel={false} />
+                    <span className={styles.capacityText}>{sh.current_occupancy || 0}/{sh.capacity}</span>
+                  </div>
+                </td>
+                <td>
+                  <span className={`${styles.statusBadge} ${styles[`status${sh.status || 'OPEN'}`]}`}>
+                    {sh.status || 'OPEN'}
+                  </span>
+                </td>
+                <td className={styles.monoCell}>{sh.contact_number}</td>
+                <td>
+                  <RoleGate allowed={['admin']}>
+                    <button className={styles.menuBtn}>⋮</button>
+                  </RoleGate>
+                </td>
+              </tr>
+>>>>>>> origin/main
             ))}
             {shelters.length === 0 && (
               <tr><td colSpan={7} className={styles.empty}>No shelters registered</td></tr>
@@ -197,6 +270,7 @@ export default function SheltersPage() {
         </table>
       </div>
 
+<<<<<<< HEAD
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Shelter' : 'Register New Shelter'}>
         <div className={styles.form}>
           {editingId ? (
@@ -265,6 +339,35 @@ export default function SheltersPage() {
           <div className={styles.formActions}>
             <button className={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
             <button className={styles.submitBtn} onClick={handleSave}>{editingId ? 'Save Changes' : 'Register Shelter'}</button>
+=======
+      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Register New Shelter">
+        <div className={styles.form}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Shelter Name</label>
+            <input className={styles.formInput} placeholder="e.g. Community Center Annex" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} />
+          </div>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Strategic Zone</label>
+              <select className={styles.formSelect} value={formData.zone_id} onChange={(e) => setFormData(p => ({ ...p, zone_id: e.target.value }))}>
+                <option value="">Select Zone</option>
+                <option value="ZONE-K1">Central Zone</option>
+                <option value="ZONE-K2">Western Zone</option>
+              </select>
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Total Capacity</label>
+              <input className={styles.formInput} type="number" placeholder="500" value={formData.capacity} onChange={(e) => setFormData(p => ({ ...p, capacity: e.target.value }))} />
+            </div>
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Primary Contact Number</label>
+            <input className={styles.formInput} placeholder="+94 XX XXX XXXX" value={formData.contact_number} onChange={(e) => setFormData(p => ({ ...p, contact_number: e.target.value }))} />
+          </div>
+          <div className={styles.formActions}>
+            <button className={styles.cancelBtn} onClick={() => setShowCreate(false)}>Cancel</button>
+            <button className={styles.submitBtn} onClick={handleCreate}>Register</button>
+>>>>>>> origin/main
           </div>
         </div>
       </Modal>

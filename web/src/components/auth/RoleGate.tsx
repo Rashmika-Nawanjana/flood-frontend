@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 
 /**
@@ -13,6 +14,12 @@
  */
 
 import type { UserRole } from '@/lib/types';
+=======
+"use client";
+
+import type { UserRole } from "@/lib/types";
+import { useUser } from "@clerk/nextjs";
+>>>>>>> origin/main
 
 interface RoleGateProps {
   children: React.ReactNode;
@@ -20,6 +27,7 @@ interface RoleGateProps {
   fallback?: React.ReactNode;
 }
 
+<<<<<<< HEAD
 import { useAuthStore } from '@/store/useAuthStore';
 
 // TODO: Replace with real session role from Keycloak when A4 integrates
@@ -30,6 +38,18 @@ function useCurrentRole(): UserRole {
 }
 
 export default function RoleGate({ children, allowed, fallback = null }: RoleGateProps) {
+=======
+export function useCurrentRole(): UserRole {
+  const { user } = useUser();
+  return (user?.publicMetadata?.role as UserRole) || "officer";
+}
+
+export default function RoleGate({
+  children,
+  allowed,
+  fallback = null,
+}: RoleGateProps) {
+>>>>>>> origin/main
   const role = useCurrentRole();
 
   if (!allowed.includes(role)) {
@@ -38,5 +58,8 @@ export default function RoleGate({ children, allowed, fallback = null }: RoleGat
 
   return <>{children}</>;
 }
+<<<<<<< HEAD
 
 export { useCurrentRole };
+=======
+>>>>>>> origin/main

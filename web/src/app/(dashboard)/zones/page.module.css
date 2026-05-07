@@ -26,6 +26,7 @@
 .condItem { display: flex; flex-direction: column; gap: 4px; }
 .condLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
 .condValue { font-family: var(--font-jetbrains-mono); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+<<<<<<< HEAD
 
 /* Modal Form Styles */
 .form { display: flex; flex-direction: column; gap: 20px; max-height: 70vh; overflow-y: auto; padding: 4px 24px 4px 4px; margin-right: -16px; }
@@ -57,3 +58,5 @@
 .iconBtn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius); color: var(--text-muted); transition: all var(--transition-fast); }
 .iconBtn:hover { background-color: var(--bg-surface-high); color: var(--text-primary); }
 .dangerText { color: var(--risk-critical) !important; }
+=======
+>>>>>>> origin/main

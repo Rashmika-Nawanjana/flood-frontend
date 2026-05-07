@@ -11,7 +11,11 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   devtools(
     (set) => ({
+<<<<<<< HEAD
       sidebarOpen: true,
+=======
+      sidebarOpen: false,
+>>>>>>> origin/main
       activeNavItem: 'Dashboard',
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setActiveNavItem: (item) => set({ activeNavItem: item }),

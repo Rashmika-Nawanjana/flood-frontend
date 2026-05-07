@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSensorStore } from '@/store/useSensorStore';
@@ -28,6 +29,18 @@ import type {
  *
  * Connection URL: NEXT_PUBLIC_WS_URL (default: http://localhost:3001)
  * Socket.IO path: /ws/live
+=======
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
+
+/**
+ * SocketContext — HANDOFF FOR MEMBER 4
+ * 
+ * Set NEXT_PUBLIC_WS_URL to auto-connect.
+ * If not set, runs in offline/demo mode.
+ * 
+ * Connection URL format: ws://<server>/ws/live
+>>>>>>> origin/main
  */
 
 interface SocketContextValue {
@@ -40,6 +53,7 @@ const SocketContext = createContext<SocketContextValue>({
   isConnected: false,
 });
 
+<<<<<<< HEAD
 interface PredictionPayload {
   prediction_id: string;
   zone_id: string;
@@ -59,6 +73,8 @@ interface ZoneRiskPayload extends ZoneRiskUpdateEvent {
   population_at_risk?: number;
 }
 
+=======
+>>>>>>> origin/main
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
@@ -71,14 +87,21 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     const socket = io(wsUrl, {
+<<<<<<< HEAD
       path: '/ws/live',
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: Infinity,
+=======
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+>>>>>>> origin/main
       reconnectionDelay: 2000,
     });
 
     socket.on('connect', () => {
+<<<<<<< HEAD
       console.info('[FloodSense] Socket.IO connected:', socket.id);
       setIsConnected(true);
     });
@@ -203,6 +226,27 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off('alert:resolved');
       socket.off('sensor:offline');
       socket.off('anomaly:new');
+=======
+      console.info('[FloodSense] Socket.IO connected');
+      setIsConnected(true);
+
+      // TODO: Activate when Socket.IO is live (Member 4)
+      // socket.on('sensor:update', (data) => useSensorStore.getState().updateSensor(data.sensor_id, data));
+      // socket.on('alert:new', (data) => useAlertStore.getState().addAlert(data));
+    });
+
+    socket.on('disconnect', () => {
+      console.warn('[FloodSense] Socket.IO disconnected');
+      setIsConnected(false);
+    });
+
+    socketRef.current = socket;
+
+    return () => {
+      // TODO: Clean up event listeners here when activated
+      // socket.off('sensor:update');
+      // socket.off('alert:new');
+>>>>>>> origin/main
       socket.disconnect();
       socketRef.current = null;
     };
@@ -217,6 +261,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 /**
  * useSocket — Subscribe to a Socket.IO event
+<<<<<<< HEAD
+=======
+ * 
+ * Usage:
+ *   useSocket('sensor:update', (data) => { ... });
+>>>>>>> origin/main
  */
 export function useSocket<T>(event: string, handler: (data: T) => void) {
   const { socket, isConnected } = useContext(SocketContext);
@@ -225,6 +275,10 @@ export function useSocket<T>(event: string, handler: (data: T) => void) {
 
   useEffect(() => {
     if (!socket) return;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     const listener = (data: T) => handlerRef.current(data);
     socket.on(event, listener);
     return () => { socket.off(event, listener); };

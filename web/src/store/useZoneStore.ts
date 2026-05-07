@@ -6,9 +6,12 @@ interface ZoneState {
   zones: Zone[];
   selectedZoneId: string | null;
   setZones: (zones: Zone[]) => void;
+<<<<<<< HEAD
   addZone: (zone: Zone) => void;
   updateZone: (id: string, data: Partial<Zone>) => void;
   removeZone: (id: string) => void;
+=======
+>>>>>>> origin/main
   selectZone: (id: string | null) => void;
 }
 
@@ -18,6 +21,7 @@ export const useZoneStore = create<ZoneState>()(
       zones: [],
       selectedZoneId: null,
       setZones: (zones) => set({ zones }),
+<<<<<<< HEAD
       addZone: (zone) =>
         set((state) => ({ zones: [...state.zones, zone] })),
       updateZone: (id, data) =>
@@ -30,6 +34,8 @@ export const useZoneStore = create<ZoneState>()(
         set((state) => ({
           zones: state.zones.filter((z) => z.zone_id !== id),
         })),
+=======
+>>>>>>> origin/main
       selectZone: (id) => set({ selectedZoneId: id }),
     }),
     { name: 'ZoneStore' }

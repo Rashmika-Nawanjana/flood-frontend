@@ -1,17 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { Plus, Edit2, Trash2, MapPin, X, PlusCircle, Globe, Info, Hash, Palette } from 'lucide-react';
+=======
+import { Plus } from 'lucide-react';
+>>>>>>> origin/main
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
 import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
+<<<<<<< HEAD
 import type { Zone, RiskLevel, GeoJSONPolygon } from '@/lib/types';
+=======
+import type { Zone, ApiResponse } from '@/lib/types';
+>>>>>>> origin/main
 import { useZoneStore } from '@/store/useZoneStore';
 import styles from './page.module.css';
 
 export default function ZonesPage() {
+<<<<<<< HEAD
   const { zones, selectedZoneId, selectZone, addZone, updateZone, removeZone } = useZoneStore();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -149,6 +158,10 @@ export default function ZonesPage() {
       console.error(e);
     }
   };
+=======
+  const { zones, selectedZoneId, selectZone } = useZoneStore();
+  const [showCreate, setShowCreate] = useState(false);
+>>>>>>> origin/main
 
   // Auto-select first zone if none selected
   useEffect(() => {
@@ -168,10 +181,17 @@ export default function ZonesPage() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Zone Management</h1>
+<<<<<<< HEAD
           <p className={styles.subtitle}>Strategic boundary definitions and risk assessment for Kelani Basin</p>
         </div>
         <RoleGate allowed={['admin']}>
           <button className={styles.createBtn} onClick={handleOpenCreate}><Plus size={16} /> Create Zone</button>
+=======
+          <p className={styles.subtitle}>Manage flood monitoring zones across the Kelani River basin</p>
+        </div>
+        <RoleGate allowed={['admin']}>
+          <button className={styles.createBtn} onClick={() => setShowCreate(true)}><Plus size={16} /> Create Zone</button>
+>>>>>>> origin/main
         </RoleGate>
       </div>
 
@@ -211,12 +231,16 @@ export default function ZonesPage() {
               </div>
             </div>
           ))}
+<<<<<<< HEAD
           {zones.length === 0 && <div className={styles.empty}>No zones defined</div>}
+=======
+>>>>>>> origin/main
         </div>
 
         {selected && (
           <div className={styles.detail}>
             <div className={styles.detailHeader}>
+<<<<<<< HEAD
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <h2 className={styles.detailName}>{selected.zone_name}</h2>
                 <RiskBadge level={selected.risk_level} size="md" />
@@ -227,6 +251,10 @@ export default function ZonesPage() {
                   <button className={`${styles.iconBtn} ${styles.dangerText}`} onClick={() => handleDelete(selected.zone_id)} title="Delete Zone"><Trash2 size={16} /></button>
                 </div>
               </RoleGate>
+=======
+              <h2 className={styles.detailName}>{selected.zone_name}</h2>
+              <RiskBadge level={selected.risk_level} size="md" />
+>>>>>>> origin/main
             </div>
             <span className={styles.detailMeta}>{selected.description} • ID: {selected.zone_id}</span>
 
@@ -269,6 +297,7 @@ export default function ZonesPage() {
         )}
       </div>
 
+<<<<<<< HEAD
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Modify Strategic Zone' : 'Define New Strategic Zone'}>
         <div className={styles.form}>
           <div className={styles.formRow}>
@@ -347,6 +376,10 @@ export default function ZonesPage() {
             <button className={styles.submitBtn} onClick={handleSave}>{editingId ? 'Save Changes' : 'Create Zone'}</button>
           </div>
         </div>
+=======
+      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create New Zone">
+        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Zone creation form — connects to POST /api/v1/admin/zones</p>
+>>>>>>> origin/main
       </Modal>
     </div>
   );

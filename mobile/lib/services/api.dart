@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 class ApiService {
-  static const String devBaseUrl = 'http://localhost:8000';
+  static const String devBaseUrl = 'http://0.0.0.0:8000';
   static const String stagingBaseUrl = 'https://api-stg.example.com';
   static const String prodBaseUrl = 'https://api.example.com';
 
+
   static Map<String, String> get _headers => {
-        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer ${clerkToken}',
+        'Content-Type': 'application/json',
       };
 
   // ZONES 
@@ -79,6 +81,36 @@ class ApiService {
       }
     } catch (e) {
       print("Error resolving zone: $e");
+    }
+    return null;
+  }
+
+  /// Resolve location and get zone details
+  static Future<Map<String, dynamic>?> resolveLocation({
+    required double lat,
+    required double lng,
+    String? clerkId,
+  }) async {
+    try {
+      final body = {
+        'lat': lat,
+        'lng': lng,
+        if (clerkId != null) 'clerk_id': clerkId,
+      };
+
+      final res = await http.post(
+        Uri.parse("$devBaseUrl/api/v1/location/resolve"),
+        headers: _headers,
+        body: jsonEncode(body),
+      );
+
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body);
+      } else {
+        print("Error resolving location: ${res.body}");
+      }
+    } catch (e) {
+      print("Exception during location resolution: $e");
     }
     return null;
   }

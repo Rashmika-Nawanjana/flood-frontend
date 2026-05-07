@@ -69,10 +69,10 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               icon: Icon(Icons.map_outlined),
               label: 'Map',
             ),
-            BottomNavigationBarItem(
+/*             BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined),
               label: 'Settings',
-            ),
+            ), */
           ],
         ),
       ),

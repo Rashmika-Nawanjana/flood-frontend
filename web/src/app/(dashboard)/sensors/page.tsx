@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState } from 'react';
 import { Plus, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
@@ -9,10 +10,21 @@ import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
+=======
+import { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import StatCard from '@/components/ui/StatCard';
+import ProgressBar from '@/components/ui/ProgressBar';
+import RoleGate from '@/components/auth/RoleGate';
+import { api } from '@/lib/api';
+import type { Sensor, ApiResponse } from '@/lib/types';
+import { useSensorStore } from '@/store/useSensorStore';
+>>>>>>> origin/main
 import styles from './page.module.css';
 
 export default function SensorsPage() {
   const sensors = useSensorStore(s => s.sensors);
+<<<<<<< HEAD
   const addSensor = useSensorStore(s => s.addSensor);
   const updateSensor = useSensorStore(s => s.updateSensor);
   const removeSensor = useSensorStore(s => s.removeSensor);
@@ -109,6 +121,10 @@ export default function SensorsPage() {
       console.error(e);
     }
   };
+=======
+  const [filter, setFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+>>>>>>> origin/main
 
   const online = sensors.filter(s => s.status?.device_online || s.device_health?.is_online).length;
   const offline = sensors.length - online;
@@ -132,7 +148,11 @@ export default function SensorsPage() {
           <p className={styles.subtitle}>Real-time telemetry from the Kelani River Basin & Colombo Metropolitan Area.</p>
         </div>
         <RoleGate allowed={['admin']}>
+<<<<<<< HEAD
           <button className={styles.addBtn} onClick={handleOpenCreate}><Plus size={16} /> Add Sensor</button>
+=======
+          <button className={styles.addBtn}><Plus size={16} /> Add Sensor</button>
+>>>>>>> origin/main
         </RoleGate>
       </div>
 
@@ -165,6 +185,7 @@ export default function SensorsPage() {
                   <h3 className={styles.sensorName}>{sensor.name.split('—')[0]?.trim()}</h3>
                   <span className={styles.sensorLocation}>{sensor.location.zone_name || sensor.name.split('—')[1]?.trim()}</span>
                 </div>
+<<<<<<< HEAD
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className={`${styles.statusDot} ${isOnline ? styles.online : styles.offline}`}>
                     {isOnline ? '● Online' : '● Offline'}
@@ -183,6 +204,11 @@ export default function SensorsPage() {
                     </div>
                   </RoleGate>
                 </div>
+=======
+                <span className={`${styles.statusDot} ${isOnline ? styles.online : styles.offline}`}>
+                  {isOnline ? '● Online' : '● Offline'}
+                </span>
+>>>>>>> origin/main
               </div>
 
               {readings && isOnline ? (
@@ -216,6 +242,7 @@ export default function SensorsPage() {
           );
         })}
       </div>
+<<<<<<< HEAD
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Sensor' : 'Register New Sensor'}>
         <div className={styles.form}>
           <div className={styles.formRow}>
@@ -258,6 +285,8 @@ export default function SensorsPage() {
           </div>
         </div>
       </Modal>
+=======
+>>>>>>> origin/main
     </div>
   );
 }

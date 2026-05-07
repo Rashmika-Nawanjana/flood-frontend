@@ -1,7 +1,11 @@
 .topbar {
   position: fixed;
   top: 0;
+<<<<<<< HEAD
   left: var(--current-sidebar-width, var(--sidebar-width));
+=======
+  left: 0;
+>>>>>>> origin/main
   right: 0;
   height: var(--topbar-height);
   background-color: var(--bg-surface);
@@ -10,6 +14,7 @@
   justify-content: space-between;
   padding: 0 24px;
   z-index: 100;
+<<<<<<< HEAD
   transition: left var(--transition-normal);
   border-bottom: 1px solid var(--glass-border);
 }
@@ -29,6 +34,15 @@
 .toggleButton:hover {
   background-color: var(--bg-surface-high);
   color: var(--text-primary);
+=======
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+>>>>>>> origin/main
 }
 
 .brandIcon {

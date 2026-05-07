@@ -100,7 +100,10 @@ table {
 
   /* Layout */
   --sidebar-width: 240px;
+<<<<<<< HEAD
   --sidebar-collapsed-width: 72px;
+=======
+>>>>>>> origin/main
   --topbar-height: 64px;
   --footer-height: 48px;
 

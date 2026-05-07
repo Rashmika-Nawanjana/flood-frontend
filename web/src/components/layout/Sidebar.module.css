@@ -1,5 +1,6 @@
 .sidebar {
   position: fixed;
+<<<<<<< HEAD
   top: 0;
   left: 0;
   width: var(--sidebar-width);
@@ -15,11 +16,23 @@
 
 .sidebar.collapsed {
   width: var(--sidebar-collapsed-width);
+=======
+  top: var(--topbar-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--topbar-height));
+  background-color: var(--bg-surface-low);
+  display: flex;
+  flex-direction: column;
+  z-index: 90;
+  overflow-y: auto;
+>>>>>>> origin/main
 }
 
 .nav {
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
   height: calc(100% - var(--topbar-height));
   padding-bottom: 16px;
   overflow-y: auto;
@@ -48,6 +61,10 @@
   color: var(--primary);
   letter-spacing: -0.02em;
   white-space: nowrap;
+=======
+  height: 100%;
+  padding: 16px 0;
+>>>>>>> origin/main
 }
 
 .navList {
@@ -74,6 +91,7 @@
   border-left: 3px solid transparent;
   transition: all var(--transition-fast);
   cursor: pointer;
+<<<<<<< HEAD
   white-space: nowrap;
   overflow: hidden;
 }
@@ -86,6 +104,8 @@
 
 .collapsed .navItem span {
   display: none;
+=======
+>>>>>>> origin/main
 }
 
 .navItem:hover {

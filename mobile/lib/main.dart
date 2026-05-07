@@ -1,14 +1,16 @@
-import 'package:flood_frontend/screens/splash_screen.dart';
+import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:flood_frontend/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
-
 void main() {
+  Clerk.initialize(
+    publishableKey: 'your-clerk-publishable-key', // Replace with your Clerk publishable key
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: SplashScreen(),
+      home: const SignInScreen(),
     );
   }
 }

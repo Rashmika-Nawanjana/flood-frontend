@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState } from 'react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
@@ -13,16 +14,39 @@ export default function AlertsPage() {
   const user = useAuthStore(s => s.user);
   const alerts = useAlertStore(s => s.alerts);
   const resolveAlertStore = useAlertStore(s => s.resolveAlert);
+=======
+import { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import RiskBadge from '@/components/ui/RiskBadge';
+import RoleGate from '@/components/auth/RoleGate';
+import { api } from '@/lib/api';
+import type { Alert, ApiResponse } from '@/lib/types';
+import styles from './page.module.css';
+
+export default function AlertsPage() {
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+>>>>>>> origin/main
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    api.alerts.list().then((res) => {
+      const d = res as ApiResponse<Alert[]>;
+      setAlerts(d.data || []);
+    }).catch(console.error);
+  }, []);
+
+>>>>>>> origin/main
   const filtered = alerts.filter((a) => {
     if (filterSeverity !== 'ALL' && a.severity !== filterSeverity) return false;
     if (filterStatus !== 'ALL' && a.status !== filterStatus) return false;
     return true;
   });
 
+<<<<<<< HEAD
   const handleResolve = async () => {
     if (!selected) return;
     try {
@@ -41,6 +65,8 @@ export default function AlertsPage() {
     }
   };
 
+=======
+>>>>>>> origin/main
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -48,6 +74,12 @@ export default function AlertsPage() {
           <h1 className={styles.title}>Alert Management</h1>
           <p className={styles.subtitle}>Monitor and manage emergency alerts across the monitored catchments.</p>
         </div>
+<<<<<<< HEAD
+=======
+        <RoleGate allowed={['admin']}>
+          <button className={styles.createBtn}><Plus size={16} /> Create Alert</button>
+        </RoleGate>
+>>>>>>> origin/main
       </div>
 
       <div className={styles.filters}>
@@ -116,6 +148,7 @@ export default function AlertsPage() {
                 <span className={styles.detailValue}>{selected.recommended_action}</span>
               </div>
             </div>
+<<<<<<< HEAD
             <RoleGate allowed={['admin', 'officer']}>
               <div className={styles.detailActions}>
                 <button 
@@ -125,6 +158,11 @@ export default function AlertsPage() {
                 >
                   {selected.status === 'RESOLVED' ? 'Alert Resolved' : 'Resolve Alert & Close Case'}
                 </button>
+=======
+            <RoleGate allowed={['admin']}>
+              <div className={styles.detailActions}>
+                <button className={styles.resolveBtn}>Resolve Alert & Close Case</button>
+>>>>>>> origin/main
               </div>
             </RoleGate>
           </div>

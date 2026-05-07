@@ -9,7 +9,10 @@ interface AlertState {
   dismissedAlertIds: string[];
   setAlerts: (alerts: Alert[]) => void;
   addAlert: (alert: Alert) => void;
+<<<<<<< HEAD
   resolveAlert: (id: string, data: { resolved_at: string; resolution_note: string }) => void;
+=======
+>>>>>>> origin/main
   selectAlert: (id: string | null) => void;
   setSeverityFilter: (filter: string) => void;
   dismissAlert: (id: string) => void;
@@ -25,6 +28,7 @@ export const useAlertStore = create<AlertState>()(
       setAlerts: (alerts) => set({ alerts }),
       addAlert: (alert) =>
         set((state) => ({ alerts: [alert, ...state.alerts] })),
+<<<<<<< HEAD
       resolveAlert: (id, data) =>
         set((state) => ({
           alerts: state.alerts.map((a) =>
@@ -33,6 +37,8 @@ export const useAlertStore = create<AlertState>()(
               : a
           ),
         })),
+=======
+>>>>>>> origin/main
       selectAlert: (id) => set({ selectedAlertId: id }),
       setSeverityFilter: (filter) => set({ severityFilter: filter }),
       dismissAlert: (id) =>

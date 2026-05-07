@@ -6,11 +6,15 @@ import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useAlertStore } from '@/store/useAlertStore';
 import { useShelterStore } from '@/store/useShelterStore';
+<<<<<<< HEAD
 import { useUIStore } from '@/store/useUIStore';
+=======
+>>>>>>> origin/main
 import type { Sensor, Zone, Alert, Shelter, ApiResponse } from '@/lib/types';
 
 export default function AppInitializer() {
   const initialized = useRef(false);
+<<<<<<< HEAD
   const { sidebarOpen } = useUIStore();
 
   useEffect(() => {
@@ -25,6 +29,8 @@ export default function AppInitializer() {
       document.documentElement.classList.add('sidebar-collapsed');
     }
   }, [sidebarOpen]);
+=======
+>>>>>>> origin/main
 
   useEffect(() => {
     if (initialized.current) return;
