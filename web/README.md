@@ -207,7 +207,9 @@ Copy `.env.local.example` to `.env.local` and fill in as needed:
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 
 # Socket.IO Server (Member 4)
-NEXT_PUBLIC_WS_URL=ws://localhost:3001/ws/live
+NEXT_PUBLIC_WS_URL=ws://localhost:3001
+NEXT_PUBLIC_WS_PATH=/ws/live
+NEXT_PUBLIC_WS_NAMESPACE=/public
 
 # Clerk auth (frontend)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_REPLACE_WITH_YOUR_KEY
@@ -430,10 +432,12 @@ useSocket<ZoneRiskUpdateEvent>('zone:risk_update', (data) => {
 1. **Set your WebSocket server URL** in `.env.local`:
 
    ```
-   NEXT_PUBLIC_WS_URL=ws://your-server:3001/ws/live
+   NEXT_PUBLIC_WS_URL=ws://your-server:3001
+   NEXT_PUBLIC_WS_PATH=/ws/live
+   NEXT_PUBLIC_WS_NAMESPACE=/public
    ```
 
-   That's it — the connection happens automatically on page load.
+   That's it — the connection is now configured to use the backend Socket.IO path and public namespace automatically.
 
 2. **The provider is already wired** in `src/app/layout.tsx`. No setup needed.
 
@@ -648,7 +652,9 @@ interface RoleGateProps {
 
 ```
 NEXT_PUBLIC_API_URL=https://api.floodsense.lk/api/v1
-NEXT_PUBLIC_WS_URL=wss://ws.floodsense.lk/ws/live
+NEXT_PUBLIC_WS_URL=wss://ws.floodsense.lk
+NEXT_PUBLIC_WS_PATH=/ws/live
+NEXT_PUBLIC_WS_NAMESPACE=/public
 NEXT_PUBLIC_MAPBOX_TOKEN=pk.xxxxx
 KEYCLOAK_ISSUER=https://auth.floodsense.lk/realms/floodsense
 KEYCLOAK_CLIENT_ID=floodsense-portal
