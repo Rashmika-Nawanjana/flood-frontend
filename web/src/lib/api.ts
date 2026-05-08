@@ -1,12 +1,23 @@
 // =============================================
+// FloodSense LK — Centralized API Client
+// Routes through Kong API gateway:
+//   /v1/sensors, /v1/anomalies   → sensor-service
+//   /v1/predictions, /v1/alerts  → intelligence-service
+//   /v1/zones, /v1/shelters      → zone-service
+//   /api/...                     → main api (admin, auth, webhooks)
+// =============================================
+
 import type { User } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// Kong gateway base URL (no trailing slash, no /api suffix)
+const GATEWAY_BASE =
+  process.env.NEXT_PUBLIC_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ||
+  "http://localhost:80";
 
 async function getAuthToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   try {
-    // Get JWT from Clerk's loaded session
     const clerk = (
       window as unknown as {
         Clerk?: { session?: { getToken: () => Promise<string> } };
@@ -23,7 +34,7 @@ async function fetcher<T>(
   endpoint: string,
   params?: Record<string, string>,
 ): Promise<T> {
-  const url = new URL(`${API_BASE}${endpoint}`);
+  const url = new URL(`${GATEWAY_BASE}${endpoint}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value) url.searchParams.append(key, value);
@@ -58,7 +69,7 @@ async function mutate<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const res = await fetch(`${GATEWAY_BASE}${endpoint}`, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
@@ -72,80 +83,101 @@ async function mutate<T>(
 // ---- Public API ----
 export const api = {
   users: {
-    getZone: (clerkId: string) => fetcher<{ data: { zone_id: string } }>(`/users/${clerkId}/zone`),
+    getZone: (clerkId: string) =>
+      fetcher<{ data: { zone_id: string } }>(`/v1/users/${clerkId}/zone`),
   },
 
   sensors: {
-    list: (zoneId?: string | null) => zoneId ? fetcher(`/sensors/zone/${zoneId}/`) : fetcher("/sensors"),
-    get: (id: string) => fetcher(`/sensors/${id}`),
+    list: (zoneId?: string | null) =>
+      zoneId
+        ? fetcher(`/v1/sensors/zone/${zoneId}/`)
+        : fetcher("/v1/sensors"),
+    get: (id: string) => fetcher(`/v1/sensors/${id}`),
     history: (
       id: string,
       params?: { from?: string; to?: string; interval?: string },
-    ) => fetcher(`/sensors/${id}/history`, params as Record<string, string>),
-    create: (data: unknown) => mutate("POST", "/admin/sensors", data),
+    ) =>
+      fetcher(`/v1/sensors/${id}/history`, params as Record<string, string>),
+    create: (data: unknown) => mutate("POST", "/api/admin/sensors", data),
     update: (id: string, data: unknown) =>
-      mutate("PATCH", `/admin/sensors/${id}`, data),
-    deactivate: (id: string) => mutate("DELETE", `/admin/sensors/${id}`),
+      mutate("PATCH", `/api/admin/sensors/${id}`, data),
+    deactivate: (id: string) => mutate("DELETE", `/api/admin/sensors/${id}`),
   },
 
   zones: {
     list: async (zoneId?: string | null) => {
       if (zoneId) {
-        const res = await fetcher<{ data: any }>(`/zones/${zoneId}`);
-        // Wrap the single zone in an array to match the /zones response signature
+        const res = await fetcher<{ data: any }>(`/v1/zones/${zoneId}`);
         return { ...res, data: res.data ? [res.data] : [] };
       }
-      return fetcher("/zones");
+      return fetcher("/v1/zones");
     },
-    get: (id: string) => fetcher(`/zones/${id}`),
-    create: (data: unknown) => mutate("POST", "/admin/zones", data),
+    get: (id: string) => fetcher(`/v1/zones/${id}`),
+    create: (data: unknown) => mutate("POST", "/api/admin/zones", data),
     update: (id: string, data: unknown) =>
-      mutate("PATCH", `/admin/zones/${id}`, data),
-    deactivate: (id: string) => mutate("DELETE", `/admin/zones/${id}`),
+      mutate("PATCH", `/api/admin/zones/${id}`, data),
+    deactivate: (id: string) => mutate("DELETE", `/api/admin/zones/${id}`),
   },
 
   shelters: {
-    create: (data: unknown) => mutate("POST", "/admin/shelters", data),
+    create: (data: unknown) => mutate("POST", "/api/admin/shelters", data),
     update: (id: string, data: unknown) =>
-      mutate("PATCH", `/admin/shelters/${id}`, data),
-    remove: (id: string) => mutate("DELETE", `/admin/shelters/${id}`),
+      mutate("PATCH", `/api/admin/shelters/${id}`, data),
+    remove: (id: string) => mutate("DELETE", `/api/admin/shelters/${id}`),
   },
 
   alerts: {
-    list: (params?: { severity?: string; status?: string; zone_id?: string }, zoneId?: string | null) =>
+    list: (
+      params?: { severity?: string; status?: string; zone_id?: string },
+      zoneId?: string | null,
+    ) =>
       zoneId
-        ? fetcher(`/zones/${zoneId}/alerts`, params as Record<string, string>)
-        : fetcher("/alerts", params as Record<string, string>),
+        ? fetcher(`/v1/zones/${zoneId}/alerts`, params as Record<string, string>)
+        : fetcher("/v1/alerts", params as Record<string, string>),
   },
 
   predictions: {
-    list: (params?: {
-      severity?: string;
-      zone_id?: string;
-      timeframe?: string;
-    }, zoneId?: string | null) =>
+    list: (
+      params?: { severity?: string; zone_id?: string; timeframe?: string },
+      zoneId?: string | null,
+    ) =>
       zoneId
-        ? fetcher(`/zones/${zoneId}/predictions`, params as Record<string, string>)
-        : fetcher("/predictions", params as Record<string, string>),
+        ? fetcher(
+            `/v1/zones/${zoneId}/predictions`,
+            params as Record<string, string>,
+          )
+        : fetcher("/v1/predictions", params as Record<string, string>),
   },
 
   anomalies: {
-    list: (params?: { status?: string; sensor_id?: string }, zoneId?: string | null) =>
+    list: (
+      params?: { status?: string; sensor_id?: string },
+      zoneId?: string | null,
+    ) =>
       zoneId
-        ? fetcher(`/zones/${zoneId}/anomalies`, params as Record<string, string>)
-        : fetcher("/anomalies", params as Record<string, string>),
+        ? fetcher(
+            `/v1/zones/${zoneId}/anomalies`,
+            params as Record<string, string>,
+          )
+        : fetcher("/v1/anomalies", params as Record<string, string>),
     resolve: (
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },
-    ) => mutate("PATCH", `/admin/anomalies/${id}`, data),
+    ) => mutate("PATCH", `/api/admin/anomalies/${id}`, data),
+  },
+
+  auth: {
+    me: () => fetcher("/api/auth/me"),
   },
 
   admin: {
     users: {
-      list: () => fetcher<{ data: User[] }>("/admin/users"),
-      create: (data: any) => mutate<any>("POST", "/admin/users", data),
-      update: (clerkId: string, data: any) => mutate<any>("PATCH", `/admin/users/${clerkId}`, data),
-      deactivate: (clerkId: string) => mutate<any>("DELETE", `/admin/users/${clerkId}`),
+      list: () => fetcher<{ data: User[] }>("/api/admin/users"),
+      create: (data: unknown) => mutate<unknown>("POST", "/api/admin/users", data),
+      update: (clerkId: string, data: unknown) =>
+        mutate<unknown>("PATCH", `/api/admin/users/${clerkId}`, data),
+      deactivate: (clerkId: string) =>
+        mutate<unknown>("DELETE", `/api/admin/users/${clerkId}`),
     },
   },
 };
