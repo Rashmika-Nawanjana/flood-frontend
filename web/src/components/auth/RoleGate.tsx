@@ -11,7 +11,7 @@ interface RoleGateProps {
 
 export function useCurrentRole(): UserRole {
   const { user } = useUser();
-  return (user?.publicMetadata?.role as UserRole) || "officer";
+  return (user?.publicMetadata?.role as UserRole) || "citizen";
 }
 
 export default function RoleGate({

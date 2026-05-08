@@ -6,21 +6,25 @@ import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useAlertStore } from '@/store/useAlertStore';
 import { useShelterStore } from '@/store/useShelterStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import type { Sensor, Zone, Alert, Shelter, ApiResponse } from '@/lib/types';
 
 export default function AppInitializer() {
   const initialized = useRef(false);
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (initialized.current) return;
+    // Only initialize once, and only when user has been loaded with a zone_id
+    if (initialized.current || !isAuthenticated || !user) return;
+    if (user.role !== 'admin' && !user.zone_id) return;
     initialized.current = true;
 
     async function loadInitialData() {
       try {
         const [sensorRes, zoneRes, alertRes] = await Promise.allSettled([
-          api.sensors.list(),
-          api.zones.list(),
-          api.alerts.list(),
+          api.sensors.list(user!.zone_id),
+          api.zones.list(user!.zone_id),
+          api.alerts.list(undefined, user!.zone_id),
           // Add shelters.list() when API supports it, for now extract from zones
         ]);
 
@@ -49,7 +53,7 @@ export default function AppInitializer() {
     }
 
     loadInitialData();
-  }, []);
+  }, [isAuthenticated, user]);
 
   return null;
 }

@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import MapPlaceholder from '@/components/maps/MapPlaceholder';
+import FloodMap from '@/components/maps/FloodMap';
 import RiskBadge from '@/components/ui/RiskBadge';
-import { api } from '@/lib/api';
-import type { Zone, ApiResponse } from '@/lib/types';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useMapStore } from '@/store/useMapStore';
 import styles from './page.module.css';
 
 export default function LiveMapPage() {
-  const zones = useZoneStore(s => s.zones);
+  const zones = useZoneStore((s) => s.zones);
   const { selectedZoneId, selectZone } = useMapStore();
-
   const totalPopulation = zones.reduce((s, z) => s + (z.population_at_risk || 0), 0);
 
   return (
@@ -24,13 +20,7 @@ export default function LiveMapPage() {
 
       <div className={styles.content}>
         <div className={styles.mapArea}>
-          <MapPlaceholder
-            height="100%"
-            title="Live Flood Map"
-            zones={zones}
-            selectedZoneId={selectedZoneId || undefined}
-            onZoneClick={(id) => selectZone(id)}
-          />
+          <FloodMap mode="live-map" />
         </div>
 
         <div className={styles.panel}>
@@ -41,16 +31,29 @@ export default function LiveMapPage() {
                 key={zone.zone_id}
                 className={`${styles.zoneItem} ${selectedZoneId === zone.zone_id ? styles.zoneSelected : ''}`}
                 onClick={() => selectZone(zone.zone_id)}
+                style={
+                  selectedZoneId === zone.zone_id
+                    ? { borderColor: zone.color_code, boxShadow: `0 0 0 1px ${zone.color_code}22` }
+                    : {}
+                }
               >
                 <div className={styles.zoneInfo}>
                   <span className={styles.zoneName}>{zone.zone_name}</span>
                   <RiskBadge level={zone.risk_level} />
                 </div>
                 <div className={styles.zoneScore}>
-                  <span className={styles.scoreValue}>{zone.risk_score}</span>
+                  <span
+                    className={styles.scoreValue}
+                    style={{ color: zone.color_code }}
+                  >
+                    {Math.round(zone.risk_score)}
+                  </span>
                 </div>
               </div>
             ))}
+            {zones.length === 0 && (
+              <p className={styles.empty}>Loading zones…</p>
+            )}
           </div>
 
           <div className={styles.impactCard}>

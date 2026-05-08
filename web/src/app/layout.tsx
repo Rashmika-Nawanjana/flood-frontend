@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: "FloodSense LK — Intelligence Portal",
   description:
     "Real-time flood monitoring, AI-powered predictions, and emergency response management for Sri Lanka.",
+  icons: {
+    icon: "/icons/favicon.ico",
+  },
 };
 
 export default function RootLayout({

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
+import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import { ANOMALY_TYPES } from '@/lib/constants';
 import type { Anomaly, ApiResponse } from '@/lib/types';
@@ -14,12 +15,16 @@ export default function AnomaliesPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  const { user, isAuthenticated } = useAuthStore();
+
   useEffect(() => {
-    api.anomalies.list().then((res) => {
+    if (!isAuthenticated || !user) return;
+    if (user.role !== 'admin' && !user.zone_id) return;
+    api.anomalies.list(undefined, user.zone_id).then((res) => {
       const d = res as ApiResponse<Anomaly[]>;
       setAnomalies(d.data || []);
     }).catch(console.error);
-  }, []);
+  }, [isAuthenticated, user]);
 
   const unresolved = anomalies.filter(a => a.status === 'UNRESOLVED').length;
   const autoAlerted = anomalies.filter(a => a.auto_alert_triggered).length;
@@ -93,7 +98,7 @@ export default function AnomaliesPage() {
                         <div className={styles.expandedLeft}>
                           <h4 className={styles.expandedTitle}>Detailed Analysis</h4>
                           <p className={styles.expandedDesc}>{a.description}</p>
-                          <RoleGate allowed={['admin', 'officer']}>
+                          <RoleGate allowed={['admin', 'field_officer']}>
                             <div className={styles.expandedActions}>
                               <button className={styles.resolveBtn} onClick={() => handleResolve(a.anomaly_id, 'Issue resolved')}>Mark as Resolved</button>
                               <button className={styles.actionBtn} onClick={() => handleResolve(a.anomaly_id, 'False alarm')}>False Alarm</button>

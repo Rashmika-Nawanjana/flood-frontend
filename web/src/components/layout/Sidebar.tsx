@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUIStore } from '@/store/useUIStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard,
   Map,
@@ -15,6 +16,7 @@ import {
   Layers,
   Building2,
   Settings,
+  Users,
 } from 'lucide-react';
 import { NAV_ITEMS, SETTINGS_NAV } from '@/lib/constants';
 import styles from './Sidebar.module.css';
@@ -30,12 +32,13 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Layers,
   Building2,
   Settings,
+  Users,
 };
 
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const { activeNavItem, setActiveNavItem } = useUIStore();
+  const { activeNavItem, setActiveNavItem, isSidebarCollapsed } = useUIStore();
 
   useEffect(() => {
     // Sync pathname to store on initial load if needed
@@ -45,11 +48,16 @@ export default function Sidebar() {
     if (currentItem) setActiveNavItem(currentItem.label);
   }, [pathname, setActiveNavItem]);
 
+  const { user } = useAuthStore();
+
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {NAV_ITEMS.map((item) => {
+            // Role-based visibility
+            if (item.label === 'Users' && user?.role !== 'admin') return null;
+            
             const Icon = ICON_MAP[item.icon];
             const active = activeNavItem === item.label;
             return (
@@ -58,9 +66,10 @@ export default function Sidebar() {
                   href={item.href}
                   className={`${styles.navItem} ${active ? styles.active : ''}`}
                   onClick={() => setActiveNavItem(item.label)}
+                  title={isSidebarCollapsed ? item.label : ''}
                 >
                   <Icon size={20} strokeWidth={1.8} />
-                  <span>{item.label}</span>
+                  {!isSidebarCollapsed && <span>{item.label}</span>}
                 </Link>
               </li>
             );
@@ -73,9 +82,10 @@ export default function Sidebar() {
           href={SETTINGS_NAV.href}
           className={`${styles.navItem} ${activeNavItem === SETTINGS_NAV.label ? styles.active : ''}`}
           onClick={() => setActiveNavItem(SETTINGS_NAV.label)}
+          title={isSidebarCollapsed ? SETTINGS_NAV.label : ''}
         >
           <Settings size={20} strokeWidth={1.8} />
-          <span>{SETTINGS_NAV.label}</span>
+          {!isSidebarCollapsed && <span>{SETTINGS_NAV.label}</span>}
         </Link>
       </nav>
     </aside>
