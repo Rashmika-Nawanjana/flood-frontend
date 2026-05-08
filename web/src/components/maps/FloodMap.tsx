@@ -10,9 +10,7 @@ import { useMapStore } from '@/store/useMapStore';
 import type { Zone, Sensor, Shelter } from '@/lib/types';
 import styles from './FloodMap.module.css';
 
-const MAPBOX_TOKEN =
-  process.env.NEXT_PUBLIC_MAPBOX_TOKEN ||
-  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 export type FloodMapMode = 'live-map' | 'evacuation';
 
