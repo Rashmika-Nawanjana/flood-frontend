@@ -12,51 +12,41 @@ import type { UserRole } from '@/lib/types';
  * Decorator to mock authenticated user role in Storybook
  */
 export const withAuthRole = (role: UserRole) => (Story: React.FC) => {
-  return function WithAuthRoleDecorator() {
-    useAuthStore.setState({
-      user: { id: 'mock-1', name: 'Mock User', email: 'mock@example.com', role },
-      isAuthenticated: true,
-    });
-    return <Story />;
-  };
+  useAuthStore.setState({
+    user: { id: 'mock-1', name: 'Mock User', email: 'mock@example.com', role },
+    isAuthenticated: true,
+  });
+  return <Story />;
 };
 
 /**
  * Decorator to populate sensor data
  */
 export const withSensors = (sensors: any[]) => (Story: React.FC) => {
-  return function WithSensorsDecorator() {
-    useSensorStore.setState({ sensors });
-    return <Story />;
-  };
+  useSensorStore.setState({ sensors });
+  return <Story />;
 };
 
 /**
  * Decorator to populate alerts
  */
 export const withAlerts = (alerts: any[]) => (Story: React.FC) => {
-  return function WithAlertsDecorator() {
-    useAlertStore.setState({ alerts });
-    return <Story />;
-  };
+  useAlertStore.setState({ alerts });
+  return <Story />;
 };
 
 /**
  * Decorator to populate zones
  */
 export const withZones = (zones: any[]) => (Story: React.FC) => {
-  return function WithZonesDecorator() {
-    useZoneStore.setState({ zones });
-    return <Story />;
-  };
+  useZoneStore.setState({ zones });
+  return <Story />;
 };
 
 /**
  * Decorator to populate shelters
  */
 export const withShelters = (shelters: any[]) => (Story: React.FC) => {
-  return function WithSheltersDecorator() {
-    useShelterStore.setState({ shelters });
-    return <Story />;
-  };
+  useShelterStore.setState({ shelters });
+  return <Story />;
 };

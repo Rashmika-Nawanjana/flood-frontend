@@ -1,32 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SignedIn, SignedOut } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { Activity, Droplets, AlertTriangle as AlertTriangleIcon, Users } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
 import { api } from '@/lib/api';
-import type { Prediction, ApiResponse } from '@/lib/types';
+import type { Sensor, Zone, Alert, Prediction, ApiResponse } from '@/lib/types';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useAlertStore } from '@/store/useAlertStore';
 import styles from './page.module.css';
 
-function SignInRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/sign-in');
-  }, [router]);
-
-  return null;
-}
-
-function DashboardContent() {
-  const sensors = useSensorStore((s) => s.sensors);
-  const zones = useZoneStore((s) => s.zones);
-  const alerts = useAlertStore((s) => s.alerts);
+export default function DashboardPage() {
+  const sensors = useSensorStore(s => s.sensors);
+  const zones = useZoneStore(s => s.zones);
+  const alerts = useAlertStore(s => s.alerts);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,11 +59,12 @@ function DashboardContent() {
         </span>
       </div>
 
+      {/* KPI Row */}
       <div className={styles.statsGrid}>
         <StatCard
           label="Active Alerts"
           value={activeAlerts}
-          subtitle={`${alerts.filter((a) => a.severity === 'CRITICAL').length} Critical, ${alerts.filter((a) => a.severity === 'HIGH').length} High`}
+          subtitle={`${alerts.filter(a => a.severity === 'CRITICAL').length} Critical, ${alerts.filter(a => a.severity === 'HIGH').length} High`}
           accentColor="var(--risk-critical)"
           icon={<AlertTriangleIcon size={20} />}
         />
@@ -89,7 +78,7 @@ function DashboardContent() {
         <StatCard
           label="Zones at Risk"
           value={highRiskZones}
-          subtitle={zones.map((z) => `${z.risk_level}`).join(', ').slice(0, 40)}
+          subtitle={zones.map(z => `${z.risk_level}`).join(', ').slice(0, 40)}
           accentColor="var(--risk-warning)"
           icon={<Droplets size={20} />}
         />
@@ -102,7 +91,9 @@ function DashboardContent() {
         />
       </div>
 
+      {/* Main content row */}
       <div className={styles.contentGrid}>
+        {/* Recent Alerts */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Recent Alerts</h2>
@@ -113,17 +104,10 @@ function DashboardContent() {
             )}
             {alerts.slice(0, 5).map((alert) => (
               <div key={alert.alert_id} className={styles.alertItem}>
-                <div
-                  className={styles.alertDot}
-                  style={{
-                    backgroundColor:
-                      alert.severity === 'CRITICAL'
-                        ? 'var(--risk-critical)'
-                        : alert.severity === 'HIGH'
-                          ? 'var(--risk-high)'
-                          : 'var(--risk-warning)',
-                  }}
-                />
+                <div className={styles.alertDot} style={{
+                  backgroundColor: alert.severity === 'CRITICAL' ? 'var(--risk-critical)' :
+                    alert.severity === 'HIGH' ? 'var(--risk-high)' : 'var(--risk-warning)'
+                }} />
                 <div className={styles.alertContent}>
                   <span className={styles.alertTitle}>{alert.title}</span>
                   <span className={styles.alertMeta}>
@@ -136,6 +120,7 @@ function DashboardContent() {
           </div>
         </div>
 
+        {/* AI Prediction Summary */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>AI Prediction Summary</h2>
@@ -151,9 +136,13 @@ function DashboardContent() {
               </div>
               <div className={styles.predMeta}>
                 <span>Confidence Level</span>
-                <span className={styles.predConfidence}>{topPrediction.confidence_percent}%</span>
+                <span className={styles.predConfidence}>
+                  {topPrediction.confidence_percent}%
+                </span>
               </div>
-              <div className={styles.predModel}>Model: {topPrediction.model_version}</div>
+              <div className={styles.predModel}>
+                Model: {topPrediction.model_version}
+              </div>
             </div>
           ) : (
             <p className={styles.emptyState}>No predictions available</p>
@@ -161,6 +150,7 @@ function DashboardContent() {
         </div>
       </div>
 
+      {/* System Health */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h2 className={styles.cardTitle}>System Health</h2>
@@ -175,18 +165,5 @@ function DashboardContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function DashboardPage() {
-  return (
-    <>
-      <SignedOut>
-        <SignInRedirect />
-      </SignedOut>
-      <SignedIn>
-        <DashboardContent />
-      </SignedIn>
-    </>
   );
 }
