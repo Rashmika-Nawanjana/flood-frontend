@@ -11,3 +11,18 @@
   background-color: var(--bg-base);
   transition: margin-left var(--transition-normal);
 }
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 89;
+}
+
+@media (max-width: 767px) {
+  .main {
+    margin-left: 0;
+    padding: 16px;
+    padding-bottom: calc(var(--footer-height) + 60px);
+  }
+}

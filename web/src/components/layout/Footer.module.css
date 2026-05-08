@@ -12,6 +12,21 @@
   z-index: 80;
 }
 
+@media (max-width: 767px) {
+  .footer {
+    left: 0;
+    padding: 0 16px;
+  }
+
+  .copyright {
+    font-size: 10px;
+  }
+
+  .statusText {
+    display: none;
+  }
+}
+
 .copyright {
   font-size: 12px;
   color: var(--text-muted);

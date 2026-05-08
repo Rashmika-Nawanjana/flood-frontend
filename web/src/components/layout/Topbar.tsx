@@ -10,7 +10,15 @@ import { useUIStore } from '@/store/useUIStore';
 export default function Topbar() {
   const [isMounted, setIsMounted] = useState(false);
   const user = useAuthStore((state) => state.user);
-  const { isSidebarCollapsed, toggleSidebarCollapse } = useUIStore();
+  const { isSidebarCollapsed, toggleSidebarCollapse, setMobileDrawerOpen, isMobileDrawerOpen } = useUIStore();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
  
   useEffect(() => {
     setIsMounted(true);
@@ -100,9 +108,9 @@ export default function Topbar() {
           />
         </svg>
         <span className={styles.brandText}>FloodSense LK</span>
-        <button 
-          className={styles.menuToggle} 
-          onClick={toggleSidebarCollapse}
+        <button
+          className={styles.menuToggle}
+          onClick={isMobile ? () => setMobileDrawerOpen(!isMobileDrawerOpen) : toggleSidebarCollapse}
           aria-label="Toggle Sidebar"
         >
           <Menu size={20} />

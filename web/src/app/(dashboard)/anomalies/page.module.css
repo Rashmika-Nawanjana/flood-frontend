@@ -29,3 +29,12 @@
 .deviationRow { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); padding: 8px 0; }
 .deviationValues { font-family: var(--font-jetbrains-mono); color: var(--risk-low); }
 .deviationDetected { font-family: var(--font-jetbrains-mono); font-size: 16px; font-weight: 700; color: var(--risk-critical); }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .statsGrid { grid-template-columns: 1fr; }
+  .filters { flex-wrap: wrap; }
+  .table th:nth-child(4), .table td:nth-child(4) { display: none; }
+  .expandedContent { flex-direction: column; }
+  .expandedRight { width: 100%; }
+}

@@ -90,6 +90,24 @@
   justify-content: flex-end;
 }
 
+@media (max-width: 767px) {
+  .brand {
+    width: auto;
+    min-width: auto;
+    padding-left: 16px;
+    gap: 12px;
+  }
+
+  .brandText {
+    font-size: 16px;
+  }
+
+  .actions {
+    min-width: auto;
+    padding-right: 8px;
+  }
+}
+
 
 
 .userInfo {

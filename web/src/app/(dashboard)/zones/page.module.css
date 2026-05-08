@@ -26,3 +26,14 @@
 .condItem { display: flex; flex-direction: column; gap: 4px; }
 .condLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
 .condValue { font-family: var(--font-jetbrains-mono); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .content { flex-direction: column; }
+  .detail { width: 100%; max-height: none; }
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr; }
+}
