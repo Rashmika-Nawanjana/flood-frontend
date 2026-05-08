@@ -24,3 +24,11 @@
 .summaryLabel { font-family: var(--font-space-grotesk); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
 .summaryValue { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-jetbrains-mono); font-size: 14px; color: var(--text-primary); }
 .summaryTime { font-family: var(--font-jetbrains-mono); font-size: 24px; font-weight: 700; color: var(--text-primary); }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .content { flex-direction: column; height: auto; }
+  .mapArea { height: 300px; }
+  .panel { width: 100%; max-height: 400px; }
+  .summary { flex-wrap: wrap; }
+}

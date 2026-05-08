@@ -40,3 +40,15 @@
 .cancelBtn { padding: 12px 24px; background-color: var(--bg-surface-high); color: var(--text-primary); border-radius: var(--radius); font-size: 14px; font-weight: 600; }
 .submitBtn { padding: 12px 24px; background-color: var(--primary); color: #fff; border-radius: var(--radius); font-size: 14px; font-weight: 600; }
 .submitBtn:hover { background-color: var(--primary-hover); }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .table th:nth-child(4), .table td:nth-child(4),
+  .table th:nth-child(5), .table td:nth-child(5) { display: none; }
+  .formRow { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr; }
+}

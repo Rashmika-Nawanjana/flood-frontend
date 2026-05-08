@@ -31,3 +31,12 @@
 .detailActions { display: flex; flex-direction: column; gap: 8px; }
 .resolveBtn { padding: 12px; background-color: var(--risk-low); color: var(--text-inverse); border-radius: var(--radius); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; transition: opacity var(--transition-fast); }
 .resolveBtn:hover { opacity: 0.9; }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .filters { flex-wrap: wrap; }
+  .content { flex-direction: column; }
+  .detail { width: 100%; }
+  .table th:nth-child(3), .table td:nth-child(3),
+  .table th:nth-child(4), .table td:nth-child(4) { display: none; }
+}
