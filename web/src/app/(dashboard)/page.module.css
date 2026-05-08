@@ -52,6 +52,34 @@
   gap: 16px;
 }
 
+@media (max-width: 767px) {
+  .header {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .contentGrid,
+  .row2,
+  .row3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Card */
 .card {
   background-color: var(--bg-surface);

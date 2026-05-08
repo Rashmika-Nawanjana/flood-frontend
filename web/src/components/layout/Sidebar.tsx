@@ -38,7 +38,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const { activeNavItem, setActiveNavItem, isSidebarCollapsed } = useUIStore();
+  const { activeNavItem, setActiveNavItem, isSidebarCollapsed, isMobileDrawerOpen, setMobileDrawerOpen } = useUIStore();
 
   useEffect(() => {
     // Sync pathname to store on initial load if needed
@@ -50,14 +50,18 @@ export default function Sidebar() {
 
   const { user } = useAuthStore();
 
+  const handleNavClick = (label: string) => {
+    setActiveNavItem(label);
+    setMobileDrawerOpen(false);
+  };
+
   return (
-    <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
+    <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.collapsed : ''} ${isMobileDrawerOpen ? styles.drawerOpen : ''}`}>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {NAV_ITEMS.map((item) => {
-            // Role-based visibility
             if (item.label === 'Users' && user?.role !== 'admin') return null;
-            
+
             const Icon = ICON_MAP[item.icon];
             const active = activeNavItem === item.label;
             return (
@@ -65,11 +69,11 @@ export default function Sidebar() {
                 <Link
                   href={item.href}
                   className={`${styles.navItem} ${active ? styles.active : ''}`}
-                  onClick={() => setActiveNavItem(item.label)}
-                  title={isSidebarCollapsed ? item.label : ''}
+                  onClick={() => handleNavClick(item.label)}
+                  title={isSidebarCollapsed && !isMobileDrawerOpen ? item.label : ''}
                 >
                   <Icon size={20} strokeWidth={1.8} />
-                  {!isSidebarCollapsed && <span>{item.label}</span>}
+                  {(!isSidebarCollapsed || isMobileDrawerOpen) && <span>{item.label}</span>}
                 </Link>
               </li>
             );
@@ -81,11 +85,11 @@ export default function Sidebar() {
         <Link
           href={SETTINGS_NAV.href}
           className={`${styles.navItem} ${activeNavItem === SETTINGS_NAV.label ? styles.active : ''}`}
-          onClick={() => setActiveNavItem(SETTINGS_NAV.label)}
-          title={isSidebarCollapsed ? SETTINGS_NAV.label : ''}
+          onClick={() => handleNavClick(SETTINGS_NAV.label)}
+          title={isSidebarCollapsed && !isMobileDrawerOpen ? SETTINGS_NAV.label : ''}
         >
           <Settings size={20} strokeWidth={1.8} />
-          {!isSidebarCollapsed && <span>{SETTINGS_NAV.label}</span>}
+          {(!isSidebarCollapsed || isMobileDrawerOpen) && <span>{SETTINGS_NAV.label}</span>}
         </Link>
       </nav>
     </aside>

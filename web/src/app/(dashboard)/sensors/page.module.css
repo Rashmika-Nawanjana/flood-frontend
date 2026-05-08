@@ -26,3 +26,15 @@
 .offlineMsg { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 12px 0; }
 .batteryRow { display: flex; align-items: center; gap: 12px; }
 .batteryLabel { font-family: var(--font-space-grotesk); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }
+
+@media (max-width: 767px) {
+  .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .filters { flex-wrap: wrap; }
+  .searchInput { min-width: 0; }
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr; }
+}
