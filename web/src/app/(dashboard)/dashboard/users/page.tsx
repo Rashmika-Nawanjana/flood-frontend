@@ -2,59 +2,68 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Plus, 
-  Edit2, 
-  UserMinus, 
-  UserCheck, 
-  Eye, 
+import {
+  Plus,
+  Edit2,
+  UserMinus,
+  UserCheck,
+  Eye,
   EyeOff,
   Users as UsersIcon,
   ShieldCheck,
   UserCog,
-  User as UserIcon
+  User as UserIcon,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import RoleGate from '@/components/auth/RoleGate';
 import StatCard from '@/components/ui/StatCard';
 import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
-import type { User, UserRole, Zone, ApiResponse } from '@/lib/types';
+import type { User, UserRole, Zone } from '@/lib/types';
 import styles from './page.module.css';
+
+const PAGE_SIZE = 15;
 
 export default function UsersPage() {
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
-  
-  // State
+
   const [users, setUsers] = useState<User[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Filters
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  // Filters (applied client-side on the current page)
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  
+
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Redirect if not admin
   useEffect(() => {
     if (currentUser && currentUser.role !== 'admin') {
       router.push('/dashboard');
     }
   }, [currentUser, router]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (targetPage = page) => {
     try {
       setLoading(true);
-      const res = (await api.admin.users.list()) as ApiResponse<User[]>;
+      const res = await api.admin.users.list({ page: targetPage, page_size: PAGE_SIZE }) as any;
       setUsers(res.data || []);
+      setTotal(res.total ?? 0);
+      setTotalPages(res.total_pages ?? 1);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -66,7 +75,7 @@ export default function UsersPage() {
 
   const fetchZones = async () => {
     try {
-      const res = (await api.zones.list()) as ApiResponse<Zone[]>;
+      const res = await api.zones.list() as any;
       setZones(res.data || []);
     } catch (err) {
       console.error('Failed to fetch zones:', err);
@@ -74,30 +83,38 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(page);
+  }, [page]);
+
+  useEffect(() => {
     fetchZones();
   }, []);
 
-  // Stats
+  // Stats computed from all loaded users on this page
   const stats = useMemo(() => {
-    const total = users.length;
     const admins = users.filter(u => u.role === 'admin').length;
     const fieldOfficers = users.filter(u => u.role === 'field_officer').length;
     const citizens = users.filter(u => u.role === 'citizen').length;
     return { total, admins, fieldOfficers, citizens };
-  }, [users]);
+  }, [users, total]);
 
-  // Filtered Users
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      const matchesSearch = u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           u.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch =
+        (u.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-      const matchesStatus = statusFilter === 'ALL' || 
-                           (statusFilter === 'ACTIVE' ? u.is_active : !u.is_active);
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'ACTIVE' ? u.is_active : !u.is_active);
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users, searchTerm, roleFilter, statusFilter]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setPage(newPage);
+  };
 
   if (currentUser?.role !== 'admin') return null;
 
@@ -118,44 +135,24 @@ export default function UsersPage() {
         {/* Stats Row */}
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <StatCard 
-              label="Total Users" 
-              value={stats.total} 
-              accentColor="#3b82f6" 
-              icon={<UsersIcon size={20} />} 
-            />
+            <StatCard label="Total Users" value={stats.total} accentColor="#3b82f6" icon={<UsersIcon size={20} />} />
           </div>
           <div className={styles.statCard}>
-            <StatCard 
-              label="Admins" 
-              value={stats.admins} 
-              accentColor="#3b82f6" 
-              icon={<ShieldCheck size={20} />} 
-            />
+            <StatCard label="Admins" value={stats.admins} accentColor="#3b82f6" icon={<ShieldCheck size={20} />} />
           </div>
           <div className={styles.statCard}>
-            <StatCard 
-              label="Field Officers" 
-              value={stats.fieldOfficers} 
-              accentColor="#f97316" 
-              icon={<UserCog size={20} />} 
-            />
+            <StatCard label="Field Officers" value={stats.fieldOfficers} accentColor="#f97316" icon={<UserCog size={20} />} />
           </div>
           <div className={styles.statCard}>
-            <StatCard 
-              label="Citizens" 
-              value={stats.citizens} 
-              accentColor="#6b7280" 
-              icon={<UserIcon size={20} />} 
-            />
+            <StatCard label="Citizens" value={stats.citizens} accentColor="#6b7280" icon={<UserIcon size={20} />} />
           </div>
         </div>
 
         {/* Search + Filter Bar */}
         <div className={styles.filters}>
-          <input 
-            className={styles.searchInput} 
-            placeholder="Search by name or email..." 
+          <input
+            className={styles.searchInput}
+            placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -172,6 +169,8 @@ export default function UsersPage() {
           </select>
         </div>
 
+        {error && <div className={styles.errorMsg}>{error}</div>}
+
         {/* Users Table */}
         <div className={styles.tableContainer}>
           <table className={styles.table}>
@@ -186,119 +185,149 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((u) => (
-                <tr key={u.clerk_id}>
-                  <td>
-                    <div className={styles.nameCell}>
-                      <div className={styles.avatar}>{u.full_name.charAt(0)}</div>
-                      <span>{u.full_name}</span>
-                    </div>
-                  </td>
-                  <td className={styles.email}>{u.email}</td>
-                  <td>
-                    <span className={`${styles.badge} ${styles[`role_${u.role}`]}`}>
-                      {u.role.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td>{u.zone_id || '—'}</td>
-                  <td>
-                    <span className={`${styles.statusPill} ${u.is_active ? styles.statusActive : styles.statusInactive}`}>
-                      {u.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button 
-                        className={`${styles.actionBtn} ${styles.actionBtnEdit}`}
-                        title="Edit User"
-                        onClick={() => {
-                          setSelectedUser(u);
-                          setIsEditModalOpen(true);
-                        }}
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      {u.is_active ? (
-                        <button 
-                          className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
-                          title="Deactivate User"
-                          onClick={() => {
-                            setSelectedUser(u);
-                            setIsDeactivateModalOpen(true);
-                          }}
-                        >
-                          <UserMinus size={16} />
-                        </button>
-                      ) : (
-                        <button 
-                          className={`${styles.actionBtn} ${styles.actionBtnActivate}`}
-                          title="Reactivate User"
-                          onClick={async () => {
-                            try {
-                              await api.admin.users.update(u.clerk_id, { is_active: true });
-                              fetchUsers();
-                            } catch (err) {
-                              alert('Failed to reactivate user');
-                            }
-                          }}
-                        >
-                          <UserCheck size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className={styles.emptyState}>Loading users...</td>
                 </tr>
-              ))}
-              {filteredUsers.length === 0 && !loading && (
+              ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className={styles.emptyState}>
-                    {searchTerm || roleFilter !== 'ALL' || statusFilter !== 'ALL' ? 'No users matching filters found.' : 'No users found.'}
+                    {searchTerm || roleFilter !== 'ALL' || statusFilter !== 'ALL'
+                      ? 'No users matching filters found.'
+                      : 'No users found.'}
                   </td>
                 </tr>
+              ) : (
+                filteredUsers.map((u) => (
+                  <tr key={u.clerk_id}>
+                    <td>
+                      <div className={styles.nameCell}>
+                        <div className={styles.avatar}>{(u.full_name || u.email).charAt(0).toUpperCase()}</div>
+                        <span>{u.full_name || '—'}</span>
+                      </div>
+                    </td>
+                    <td className={styles.email}>{u.email}</td>
+                    <td>
+                      <span className={`${styles.badge} ${styles[`role_${u.role}`]}`}>
+                        {u.role.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td>{u.zone_id || '—'}</td>
+                    <td>
+                      <span className={`${styles.statusPill} ${u.is_active ? styles.statusActive : styles.statusInactive}`}>
+                        {u.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <button
+                          className={`${styles.actionBtn} ${styles.actionBtnEdit}`}
+                          title="Edit User"
+                          onClick={() => { setSelectedUser(u); setIsEditModalOpen(true); }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        {u.is_active ? (
+                          <button
+                            className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
+                            title="Deactivate User"
+                            onClick={() => { setSelectedUser(u); setIsDeactivateModalOpen(true); }}
+                          >
+                            <UserMinus size={16} />
+                          </button>
+                        ) : (
+                          <button
+                            className={`${styles.actionBtn} ${styles.actionBtnActivate}`}
+                            title="Reactivate User"
+                            onClick={async () => {
+                              try {
+                                await api.admin.users.update(u.clerk_id, { is_active: true });
+                                fetchUsers(page);
+                              } catch {
+                                alert('Failed to reactivate user');
+                              }
+                            }}
+                          >
+                            <UserCheck size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <span className={styles.paginationInfo}>
+              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} users
+            </span>
+            <div className={styles.paginationControls}>
+              <button
+                className={styles.pageBtn}
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                  if (idx > 0 && typeof arr[idx - 1] === 'number' && (p as number) - (arr[idx - 1] as number) > 1) {
+                    acc.push('...');
+                  }
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((item, idx) =>
+                  item === '...' ? (
+                    <span key={`ellipsis-${idx}`} className={styles.pageEllipsis}>…</span>
+                  ) : (
+                    <button
+                      key={item}
+                      className={`${styles.pageBtn} ${page === item ? styles.pageBtnActive : ''}`}
+                      onClick={() => handlePageChange(item as number)}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
+              <button
+                className={styles.pageBtn}
+                disabled={page === totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Modals */}
-        <CreateUserModal 
-          isOpen={isCreateModalOpen} 
-          onClose={() => setIsCreateModalOpen(false)} 
-          onSuccess={() => {
-            setIsCreateModalOpen(false);
-            fetchUsers();
-          }}
+        <CreateUserModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(page); }}
           zones={zones}
         />
 
         {selectedUser && (
           <>
-            <EditUserModal 
-              isOpen={isEditModalOpen} 
-              onClose={() => {
-                setIsEditModalOpen(false);
-                setSelectedUser(null);
-              }}
-              onSuccess={() => {
-                setIsEditModalOpen(false);
-                setSelectedUser(null);
-                fetchUsers();
-              }}
+            <EditUserModal
+              isOpen={isEditModalOpen}
+              onClose={() => { setIsEditModalOpen(false); setSelectedUser(null); }}
+              onSuccess={() => { setIsEditModalOpen(false); setSelectedUser(null); fetchUsers(page); }}
               user={selectedUser}
               zones={zones}
             />
-
-            <DeactivateModal 
+            <DeactivateModal
               isOpen={isDeactivateModalOpen}
-              onClose={() => {
-                setIsDeactivateModalOpen(false);
-                setSelectedUser(null);
-              }}
-              onSuccess={() => {
-                setIsDeactivateModalOpen(false);
-                setSelectedUser(null);
-                fetchUsers();
-              }}
+              onClose={() => { setIsDeactivateModalOpen(false); setSelectedUser(null); }}
+              onSuccess={() => { setIsDeactivateModalOpen(false); setSelectedUser(null); fetchUsers(page); }}
               user={selectedUser}
             />
           </>
@@ -308,13 +337,15 @@ export default function UsersPage() {
   );
 }
 
-// Internal Modal Components
+// ── Create User Modal ────────────────────────────────────────────────
+// Only admins and field officers can be created here.
+// Citizens register themselves via the sign-up form.
 function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     password: '',
-    role: 'citizen',
+    role: 'field_officer' as UserRole,
     zone_id: null as string | null,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -327,6 +358,7 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
     setError(null);
     try {
       await api.admin.users.create(formData);
+      setFormData({ full_name: '', email: '', password: '', role: 'field_officer', zone_id: null });
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to create user');
@@ -336,7 +368,7 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
   };
 
   useEffect(() => {
-    if (formData.role === 'admin' || formData.role === 'citizen') {
+    if (formData.role === 'admin') {
       setFormData(prev => ({ ...prev, zone_id: null }));
     }
   }, [formData.role]);
@@ -345,13 +377,13 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
     <Modal isOpen={isOpen} onClose={onClose} title="Create New User">
       <form onSubmit={handleSubmit}>
         {error && <div className={styles.errorMsg}>{error}</div>}
-        
+
         <div className={styles.formGroup}>
           <label className={styles.label}>Full Name</label>
-          <input 
-            className={styles.input} 
+          <input
+            className={styles.input}
             placeholder="e.g. Kasun Perera"
-            required 
+            required
             value={formData.full_name}
             onChange={e => setFormData({ ...formData, full_name: e.target.value })}
           />
@@ -359,11 +391,11 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Email Address</label>
-          <input 
-            className={styles.input} 
-            type="email" 
+          <input
+            className={styles.input}
+            type="email"
             placeholder="email@floodsense.lk"
-            required 
+            required
             value={formData.email}
             onChange={e => setFormData({ ...formData, email: e.target.value })}
           />
@@ -372,19 +404,15 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
         <div className={styles.formGroup}>
           <label className={styles.label}>Password</label>
           <div className={styles.passwordWrapper}>
-            <input 
-              className={styles.input} 
-              type={showPassword ? 'text' : 'password'} 
+            <input
+              className={styles.input}
+              type={showPassword ? 'text' : 'password'}
               placeholder="Min 8 characters"
-              required 
+              required
               value={formData.password}
               onChange={e => setFormData({ ...formData, password: e.target.value })}
             />
-            <button 
-              type="button" 
-              className={styles.togglePassword}
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <button type="button" className={styles.togglePassword} onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
@@ -392,25 +420,25 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Role</label>
-          <select 
-            className={styles.select} 
+          <select
+            className={styles.select}
             style={{ width: '100%' }}
             value={formData.role}
-            onChange={e => setFormData({ ...formData, role: e.target.value as any })}
+            onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}
           >
             <option value="admin">Admin</option>
             <option value="field_officer">Field Officer</option>
-            <option value="citizen">Citizen</option>
           </select>
+          <span className={styles.fieldHint}>Citizens register via the public sign-up form.</span>
         </div>
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Zone Assignment</label>
-          <select 
+          <select
             className={styles.select}
             style={{ width: '100%' }}
             value={formData.zone_id || ''}
-            disabled={formData.role === 'admin' || formData.role === 'citizen'}
+            disabled={formData.role === 'admin'}
             required={formData.role === 'field_officer'}
             onChange={e => setFormData({ ...formData, zone_id: e.target.value || null })}
           >
@@ -432,11 +460,12 @@ function CreateUserModal({ isOpen, onClose, onSuccess, zones }: any) {
   );
 }
 
+// ── Edit User Modal ──────────────────────────────────────────────────
 function EditUserModal({ isOpen, onClose, onSuccess, user, zones }: any) {
   const [formData, setFormData] = useState({
-    full_name: user.full_name,
-    role: user.role,
-    zone_id: user.zone_id,
+    full_name: user.full_name || '',
+    role: user.role as UserRole,
+    zone_id: user.zone_id as string | null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -465,12 +494,12 @@ function EditUserModal({ isOpen, onClose, onSuccess, user, zones }: any) {
     <Modal isOpen={isOpen} onClose={onClose} title="Edit User">
       <form onSubmit={handleSubmit}>
         {error && <div className={styles.errorMsg}>{error}</div>}
-        
+
         <div className={styles.formGroup}>
           <label className={styles.label}>Full Name</label>
-          <input 
-            className={styles.input} 
-            required 
+          <input
+            className={styles.input}
+            required
             value={formData.full_name}
             onChange={e => setFormData({ ...formData, full_name: e.target.value })}
           />
@@ -478,11 +507,11 @@ function EditUserModal({ isOpen, onClose, onSuccess, user, zones }: any) {
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Role</label>
-          <select 
-            className={styles.select} 
+          <select
+            className={styles.select}
             style={{ width: '100%' }}
             value={formData.role}
-            onChange={e => setFormData({ ...formData, role: e.target.value as any })}
+            onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}
           >
             <option value="admin">Admin</option>
             <option value="field_officer">Field Officer</option>
@@ -492,7 +521,7 @@ function EditUserModal({ isOpen, onClose, onSuccess, user, zones }: any) {
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Zone Assignment</label>
-          <select 
+          <select
             className={styles.select}
             style={{ width: '100%' }}
             value={formData.zone_id || ''}
@@ -518,6 +547,7 @@ function EditUserModal({ isOpen, onClose, onSuccess, user, zones }: any) {
   );
 }
 
+// ── Deactivate Modal ─────────────────────────────────────────────────
 function DeactivateModal({ isOpen, onClose, onSuccess, user }: any) {
   const [loading, setLoading] = useState(false);
 
@@ -526,7 +556,7 @@ function DeactivateModal({ isOpen, onClose, onSuccess, user }: any) {
     try {
       await api.admin.users.deactivate(user.clerk_id);
       onSuccess();
-    } catch (err) {
+    } catch {
       alert('Failed to deactivate user');
     } finally {
       setLoading(false);
@@ -540,9 +570,9 @@ function DeactivateModal({ isOpen, onClose, onSuccess, user }: any) {
       </div>
       <div className={styles.modalActions}>
         <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-        <button 
-          type="button" 
-          className={`${styles.submitBtn} ${styles.submitBtnDestructive}`} 
+        <button
+          type="button"
+          className={`${styles.submitBtn} ${styles.submitBtnDestructive}`}
           disabled={loading}
           onClick={handleDeactivate}
         >

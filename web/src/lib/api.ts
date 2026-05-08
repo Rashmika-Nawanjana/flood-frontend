@@ -172,7 +172,15 @@ export const api = {
 
   admin: {
     users: {
-      list: () => fetcher<{ data: User[] }>("/api/admin/users"),
+      list: (params?: { page?: number; page_size?: number }) =>
+        fetcher<{ data: User[]; total: number; total_pages: number; page: number }>(
+          "/api/admin/users",
+          params
+            ? Object.fromEntries(
+                Object.entries(params).map(([k, v]) => [k, String(v)])
+              )
+            : undefined,
+        ),
       create: (data: unknown) => mutate<unknown>("POST", "/api/admin/users", data),
       update: (clerkId: string, data: unknown) =>
         mutate<unknown>("PATCH", `/api/admin/users/${clerkId}`, data),
