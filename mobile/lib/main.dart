@@ -27,7 +27,7 @@ void main() async {
   runApp(
     ClerkAuth(
       config: ClerkAuthConfig(
-        publishableKey: 'sk_test_PPPuGorLorxExLV3AU6T8WwHokg3uLIqa90aiZpd54', // ← replace with your key
+        publishableKey: 'pk_test...', // ← replace the key
         persistor: Persistor.none,
       ),
       child: const FloodSenseApp(),
