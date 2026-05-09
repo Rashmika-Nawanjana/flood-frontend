@@ -1,31 +1,48 @@
 import 'dart:convert';
 import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:http/http.dart' as http;
-class ApiService {
-  static const String devBaseUrl = 'http://10.0.2.2:8000';
-  static const String stagingBaseUrl = 'https://api-stg.example.com';
-  static const String prodBaseUrl = 'https://api.example.com';
 
-static Future<Map<String, String>> getHeaders() async {
-  final token = await Clerk.instance.session?.getToken();
+class AuthStore {
+  static String? token;
 
-  return {
-    'Authorization': 'Bearer $token',
-    'Content-Type': 'application/json',
-  };
+  static void setToken(String? newToken) {
+    token = newToken;
+  }
+
+  static String? getToken() => token;
 }
-  // ZONES 
+
+class ApiService {
+  // ── Environment config ──────────────────────────────────────────────────────
+  static const String _dev = 'http://10.0.2.2:8000';
+  static const String _stg = 'https://api-stg.example.com';
+  static const String _prod = 'https://api.example.com';
+
+
+  /// Change this to switch environments
+  static const String baseUrl = _dev;
+
+  // ── Auth header ──────────────────────────────────────────────────────────────
+  static Future<Map<String, String>> _headers() async {
+    final token = AuthStore.getToken();
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  // ── Zones ────────────────────────────────────────────────────────────────────
+
   /// Fetch all monitoring zones
   static Future<List<dynamic>> getZones() async {
     try {
-      final headers = await getHeaders();
-      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones"), headers: headers);
-
-      if (res.statusCode == 200) {
-        return jsonDecode(res.body);
-      }
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/v1/zones'),
+        headers: await _headers(),
+      );
+      if (res.statusCode == 200) return jsonDecode(res.body);
     } catch (e) {
-      print("Error fetching zones: $e");
+      _log('getZones', e);
     }
     return [];
   }
@@ -33,92 +50,80 @@ static Future<Map<String, String>> getHeaders() async {
   /// Get details for a specific zone
   static Future<Map<String, dynamic>?> getZone(String zoneId) async {
     try {
-      final headers = await getHeaders();
-      final res = await http.get(Uri.parse("$devBaseUrl/api/v1/zones/$zoneId"), headers: headers);
-
-      if (res.statusCode == 200) {
-        return jsonDecode(res.body);
-      }
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/v1/zones/$zoneId'),
+        headers: await _headers(),
+      );
+      if (res.statusCode == 200) return jsonDecode(res.body);
     } catch (e) {
-      print("Error fetching zone $zoneId: $e");
+      _log('getZone($zoneId)', e);
     }
     return null;
   }
- 
-  // ALERTS 
-  /// Fetch alerts for a zone with optional filters
+
+  // ── Alerts ───────────────────────────────────────────────────────────────────
+
+  /// Fetch alerts for a zone with optional severity / status filters
   static Future<List<dynamic>> getAlerts({
     required String zoneId,
     String? severity,
     String? status,
+    int limit = 50,
   }) async {
-    final queryParams = {
+    final params = <String, String>{
       'zone_id': zoneId,
+      'limit': limit.toString(),
       if (severity != null) 'severity': severity,
       if (status != null) 'status': status,
     };
 
-    final uri = Uri.parse("$devBaseUrl/api/v1/alerts").replace(queryParameters: queryParams);
-    try {
-      final headers = await getHeaders();
-      final res = await http.get(uri, headers: headers);
+    final uri = Uri.parse('$baseUrl/api/v1/alerts')
+        .replace(queryParameters: params);
 
-      if (res.statusCode == 200) {
-        return jsonDecode(res.body);
-      }
+    try {
+      final res = await http.get(uri, headers: await _headers());
+      if (res.statusCode == 200) return jsonDecode(res.body);
     } catch (e) {
-      print("Error fetching alerts: $e");
+      _log('getAlerts', e);
     }
     return [];
   }
- 
-  // REVERSE GEOCODING (Location to Zone) 
-  static Future<Map<String, dynamic>?> resolveZone(double lat, double lng) async {
-    final uri = Uri.parse("$devBaseUrl/api/v1/resolve-zone").replace(
-      queryParameters: {
-        'lat': lat.toString(),
-        'lng': lng.toString(),
-      },
+
+  // ── Geocoding ────────────────────────────────────────────────────────────────
+
+  /// Resolve (lat, lng) → zone
+  static Future<Map<String, dynamic>?> resolveZone(
+      double lat, double lng) async {
+    final uri = Uri.parse('$baseUrl/api/v1/resolve-zone').replace(
+      queryParameters: {'lat': lat.toString(), 'lng': lng.toString()},
     );
     try {
-      final headers = await getHeaders();
-      final res = await http.get(uri, headers: headers);
-      if (res.statusCode == 200) {
-        return jsonDecode(res.body);
-      }
+      final res = await http.get(uri, headers: await _headers());
+      if (res.statusCode == 200) return jsonDecode(res.body);
     } catch (e) {
-      print("Error resolving zone: $e");
+      _log('resolveZone', e);
     }
     return null;
   }
 
-  /// Resolve location and get zone details
-  static Future<Map<String, dynamic>?> resolveLocation({
-    required double lat,
-    required double lng,
-    String? clerkId,
-  }) async {
+  // ── Shelters ─────────────────────────────────────────────────────────────────
+
+  /// Fetch evacuation shelters for a zone
+  static Future<List<dynamic>> getShelters(String zoneId) async {
     try {
-      final body = {
-        'lat': lat,
-        'lng': lng,
-        if (clerkId != null) 'clerk_id': clerkId,
-      };
-
-      final res = await http.post(
-        Uri.parse("$devBaseUrl/api/v1/location/resolve"),
-        headers: await getHeaders(),
-        body: jsonEncode(body),
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/v1/zones/$zoneId/shelters'),
+        headers: await _headers(),
       );
-
-      if (res.statusCode == 200) {
-        return jsonDecode(res.body);
-      } else {
-        print("Error resolving location: ${res.body}");
-      }
+      if (res.statusCode == 200) return jsonDecode(res.body);
     } catch (e) {
-      print("Exception during location resolution: $e");
+      _log('getShelters', e);
     }
-    return null;
+    return [];
   }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────────
+  static void _log(String method, Object e) =>
+      // ignore: avoid_print
+      print('[ApiService.$method] $e');
 }

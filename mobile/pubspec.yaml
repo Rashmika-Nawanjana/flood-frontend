@@ -12,7 +12,11 @@ dependencies:
   shared_preferences: ^2.5.5
   geolocator: ^14.0.2
   http: ^1.6.0
-  clerk_flutter: ^0.0.15-beta
+  socket_io_client: ^3.1.4
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+  clerk_flutter: 0.0.14-beta
+  clerk_auth: 0.0.14-beta
 
 dev_dependencies:
   flutter_test:
