@@ -85,7 +85,7 @@ export default function DashboardPage() {
   }, [user?.zone_id, setSensors, setZones, setAlerts]);
 
   const onlineSensors = sensors.filter(
-    (s) => s.status?.is_online || s.device_health?.is_online
+    (s) => s.status?.is_online || s.status?.device_online || s.device_health?.is_online
   ).length;
   const activeAlerts = alerts.filter((a) => a.status === 'ACTIVE').length;
   const highRiskZones = zones.filter(

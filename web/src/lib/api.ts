@@ -156,7 +156,7 @@ export const api = {
     ) =>
       zoneId
         ? fetcher(
-            `/v1/zones/${zoneId}/anomalies`,
+            `/v1/anomalies/${zoneId}`,
             params as Record<string, string>,
           )
         : fetcher("/v1/anomalies", params as Record<string, string>),
