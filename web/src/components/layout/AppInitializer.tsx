@@ -14,9 +14,8 @@ export default function AppInitializer() {
   const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    // Only initialize once, and only when user has been loaded with a zone_id
+    // Only initialize once, and only when user has been loaded
     if (initialized.current || !isAuthenticated || !user) return;
-    if (user.role !== 'admin' && !user.zone_id) return;
     initialized.current = true;
 
     async function loadInitialData() {
