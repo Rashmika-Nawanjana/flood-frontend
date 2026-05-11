@@ -18,7 +18,7 @@ const nextConfig = {
     },
   ],
   async rewrites() {
-    const backendHost = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://157.245.102.69';
+    const backendHost = process.env.NEXT_PUBLIC_GATEWAY_URL || 'https://flood-stg.157-245-102-69.sslip.io';
     return [
       // Microservice routes via Kong gateway
       {
