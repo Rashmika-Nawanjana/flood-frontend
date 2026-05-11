@@ -8,7 +8,7 @@ import { useSensorStore } from '@/store/useSensorStore';
 import { useShelterStore } from '@/store/useShelterStore';
 import { useMapStore } from '@/store/useMapStore';
 import type { Zone, Sensor, Shelter } from '@/lib/types';
-import styles from './FloodMap.module.css';
+import styles from './FloodMap.module.css'; 
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
