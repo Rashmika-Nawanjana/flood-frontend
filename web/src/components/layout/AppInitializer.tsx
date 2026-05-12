@@ -16,6 +16,7 @@ export default function AppInitializer() {
   const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
+    // Only initialize once, and only when user has been loaded
     if (initialized.current || !isAuthenticated || !user) return;
     initialized.current = true;
 
