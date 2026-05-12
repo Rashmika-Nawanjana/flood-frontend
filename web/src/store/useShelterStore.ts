@@ -6,6 +6,7 @@ interface ShelterState {
   shelters: Shelter[];
   selectedShelterId: string | null;
   setShelters: (shelters: Shelter[]) => void;
+  addShelter: (shelter: Shelter) => void;
   selectShelter: (id: string | null) => void;
 }
 
@@ -15,6 +16,7 @@ export const useShelterStore = create<ShelterState>()(
       shelters: [],
       selectedShelterId: null,
       setShelters: (shelters) => set({ shelters }),
+      addShelter: (shelter) => set((state) => ({ shelters: [shelter, ...state.shelters] })),
       selectShelter: (id) => set({ selectedShelterId: id }),
     }),
     { name: 'ShelterStore' }
