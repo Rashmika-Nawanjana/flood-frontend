@@ -26,6 +26,15 @@
 .expandedActions { display: flex; gap: 8px; }
 .resolveBtn { padding: 8px 16px; background-color: var(--risk-low); color: var(--text-inverse); border-radius: var(--radius); font-size: 12px; font-weight: 700; text-transform: uppercase; }
 .actionBtn { padding: 8px 16px; background-color: var(--bg-surface-high); color: var(--text-primary); border-radius: var(--radius); font-size: 12px; font-weight: 600; }
+
+.resolutionFormContainer { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; max-width: 400px; }
+.inputField, .textareaField { width: 100%; padding: 10px 14px; background-color: var(--bg-surface-high); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; }
+.inputField:focus, .textareaField:focus { outline: none; border-color: var(--primary); }
+.textareaField { resize: vertical; min-height: 80px; }
+.formActions { display: flex; gap: 8px; margin-top: 4px; }
+.submitBtn { padding: 8px 16px; background-color: var(--primary); color: var(--text-inverse); border-radius: var(--radius); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.cancelBtn { padding: 8px 16px; background-color: transparent; color: var(--text-muted); border-radius: var(--radius); font-size: 12px; font-weight: 600; text-transform: uppercase; transition: color var(--transition-fast); }
+.cancelBtn:hover { color: var(--text-primary); }
 .deviationRow { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); padding: 8px 0; }
 .deviationValues { font-family: var(--font-jetbrains-mono); color: var(--risk-low); }
 .deviationDetected { font-family: var(--font-jetbrains-mono); font-size: 16px; font-weight: 700; color: var(--risk-critical); }

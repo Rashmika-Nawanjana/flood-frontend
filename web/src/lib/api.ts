@@ -162,7 +162,7 @@ export const api = {
     resolve: (
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },
-    ) => mutate("PATCH", `/api/admin/anomalies/${id}`, data),
+    ) => mutate("PATCH", `/api/v1/admin/anomalies/${id}`, data),
   },
 
   auth: {
