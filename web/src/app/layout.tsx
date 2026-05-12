@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ClerkSync } from "@/components/auth/ClerkSync";
+import { SocketProvider } from "@/context/SocketContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,7 +51,9 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <ClerkSync />
-          {children}
+          <SocketProvider>
+            {children}
+          </SocketProvider>
         </ClerkProvider>
       </body>
     </html>

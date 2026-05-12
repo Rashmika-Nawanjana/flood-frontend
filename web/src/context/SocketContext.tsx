@@ -1,16 +1,11 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-
-/**
- * SocketContext — HANDOFF FOR MEMBER 4
- * 
- * Set NEXT_PUBLIC_WS_URL to auto-connect.
- * If not set, runs in offline/demo mode.
- * 
- * Connection URL format: ws://<server>/ws/live
- */
+import { useSensorStore } from '@/store/useSensorStore';
+import { useAlertStore } from '@/store/useAlertStore';
+import { api } from '@/lib/api';
+import type { Sensor, ApiResponse, SensorUpdateEvent, Alert } from '@/lib/types';
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -43,10 +38,51 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on('connect', () => {
       console.info('[FloodSense] Socket.IO connected');
       setIsConnected(true);
+      // Refresh all sensors from REST on (re)connect so every sensor shows
+      // current readings immediately, not just ones that emit WS events.
+      api.sensors.list().then((res) => {
+        const d = res as ApiResponse<Sensor[]>;
+        if (d.data) useSensorStore.getState().setSensors(d.data);
+      }).catch(() => {});
+    });
 
-      // TODO: Activate when Socket.IO is live (Member 4)
-      // socket.on('sensor:update', (data) => useSensorStore.getState().updateSensor(data.sensor_id, data));
-      // socket.on('alert:new', (data) => useAlertStore.getState().addAlert(data));
+    socket.on('sensor:update', (payload: { data: SensorUpdateEvent }) => {
+      const d = payload?.data;
+      if (!d?.sensor_id) return;
+      const existing = useSensorStore.getState().sensors.find(s => s.sensor_id === d.sensor_id);
+      useSensorStore.getState().updateSensor(d.sensor_id, {
+        readings: {
+          water_level_m: d.current_reading.water_level_m,
+          rainfall_mm_per_hr: d.current_reading.rainfall_mm_per_hr,
+          flow_velocity_mps: d.current_reading.flow_velocity_mps,
+          temperature_c: d.current_reading.temperature_c,
+          air_pressure_hpa: d.current_reading.air_pressure_hpa,
+        },
+        device_health: {
+          is_online: true,
+          battery_percent: existing?.device_health?.battery_percent ?? 0,
+          signal_strength_dbm: existing?.device_health?.signal_strength_dbm ?? 0,
+          last_seen: new Date().toISOString(),
+        },
+      });
+    });
+
+    socket.on('sensor:offline', (payload: { data: { sensor_id: string; last_seen: string } }) => {
+      const d = payload?.data;
+      if (!d?.sensor_id) return;
+      const existing = useSensorStore.getState().sensors.find(s => s.sensor_id === d.sensor_id);
+      useSensorStore.getState().updateSensor(d.sensor_id, {
+        device_health: {
+          is_online: false,
+          battery_percent: existing?.device_health?.battery_percent ?? 0,
+          signal_strength_dbm: existing?.device_health?.signal_strength_dbm ?? 0,
+          last_seen: d.last_seen,
+        },
+      });
+    });
+
+    socket.on('alert:new', (payload: { data: Alert }) => {
+      if (payload?.data) useAlertStore.getState().addAlert(payload.data);
     });
 
     socket.on('disconnect', () => {
@@ -57,9 +93,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socketRef.current = socket;
 
     return () => {
-      // TODO: Clean up event listeners here when activated
-      // socket.off('sensor:update');
-      // socket.off('alert:new');
+      socket.off('sensor:update');
+      socket.off('sensor:offline');
+      socket.off('alert:new');
       socket.disconnect();
       socketRef.current = null;
     };
