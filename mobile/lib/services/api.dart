@@ -15,12 +15,12 @@ class AuthStore {
 class ApiService {
   // ── Environment config ──────────────────────────────────────────────────────
   static const String _dev = 'http://10.0.2.2:8000';
-  static const String _stg = 'https://api-stg.example.com';
+  static const String _stg = 'https://stg.floodsense.lk';
   static const String _prod = 'https://api.example.com';
 
 
   /// Change this to switch environments
-  static const String baseUrl = _dev;
+  static const String baseUrl = _stg;
 
   // ── Auth header ──────────────────────────────────────────────────────────────
   static Future<Map<String, String>> _headers() async {
