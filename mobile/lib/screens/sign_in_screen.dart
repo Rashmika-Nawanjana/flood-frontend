@@ -1,6 +1,8 @@
 import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 
+import 'role_gate.dart';
+
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
@@ -8,20 +10,7 @@ class SignInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClerkAuthBuilder(
       signedInBuilder: (context, authState) {
-        Future.microtask(() {
-          if (context.mounted) {
-            Navigator.pushReplacementNamed(context, '/onboarding');
-          }
-        });
-
-        return const Scaffold(
-          backgroundColor: Color(0xFF0D1B2A),
-          body: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Color(0xFF42A5F5)),
-            ),
-          ),
-        );
+        return const RoleGate();
       },
 
       signedOutBuilder: (context, authState) {

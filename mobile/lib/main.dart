@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'screens/access_restricted_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/socket_service.dart';
@@ -71,6 +72,7 @@ class _FloodSenseAppState extends State<FloodSenseApp> {
         '/sign-in': (context) => const SignInScreen(),
         '/sign-up': (context) => const SignUpScreen(),
         '/onboarding': (context) => const SplashScreen(),
+        '/access-restricted': (context) => const AccessRestrictedScreen(),
       },
 
       home: const SignInScreen(),

@@ -210,8 +210,7 @@ Return list of zones. Schema:
     {
       "zone_id": "ZONE-4",
       "zone_name": "Kolonnawa Basin",
-      "description": "Lower Mahaweli region near Peradeniya",
-      "risk_level": "HIGH",
+      "description": "Lower Mahaweli region near Peradeniya",      "risk_level": "HIGH",
       "risk_score": 78.4,
       "color_code": "#F97316",
       "population_at_risk": 45200,
@@ -303,7 +302,10 @@ Return single zone. Schema:
     "coordinates": [[[80.610, 7.270], [80.620, 7.270], [80.620, 7.280], [80.610, 7.270]]]
   },
   "population_at_risk": 20500,
-  "description": "Lower Mahaweli region near Peradeniya"
+  "description": "Lower Mahaweli region near Peradeniya",
+  "river_id": 1,
+  "prev_zone_id": "ZONE-M3",
+  "next_zone_id": "ZONE-X1"
 }
 
 10.PATCH /api/v1/admin/zones/{zone_id}
@@ -314,7 +316,10 @@ JSON
   "geometry": {
     "type": "Polygon",
     "coordinates": [[[80.611, 7.271], [80.621, 7.271], [80.621, 7.281], [80.611, 7.271]]]
-  }
+  },
+  "river_id": 1,
+  "prev_zone_id": "ZONE-M3",
+  "next_zone_id": "ZONE-X1"
 }
 
 11.DELETE /api/v1/admin/zones/{zone_id}
@@ -765,8 +770,24 @@ The helpful message on the null case points consumers directly to the resolution
 
 On the frontend, this is the call your useAuthStore should fire on login — after Keycloak resolves the session and you have the clerk_id, hit this endpoint to rehydrate the user's zone into Zustand state immediately, before any alert or map components mount.
 
+25.GET /api/v1/admin/rivers
+{
+  "status": "success",
+  "count": 1,
+  "data": [
+    {
+      "river_id": 1,
+      "river_name": "Mahaweli River"
+    }
+  ]
+}
 
-25. POST /api/admin/users
+26.POST /api/v1/admin/rivers
+{
+  "river_name": "Kelani River"
+}
+
+27. POST /api/admin/users
 Request:
 json{
   "full_name": "Kasun Perera",
@@ -790,7 +811,7 @@ json{
   }
 }
 
-26. GET /api/admin/users
+28. GET /api/admin/users
 Response:
 json{
   "status": "success",
@@ -829,7 +850,7 @@ json{
   ]
 }
 
-27. PATCH /api/admin/users/{clerk_id}
+29. PATCH /api/admin/users/{clerk_id}
 Request:
 json{
   "full_name": "Kasun Bandara",
@@ -851,7 +872,7 @@ json{
   }
 }
 
-28. DELETE /api/admin/users/{clerk_id}
+30. DELETE /api/admin/users/{clerk_id}
 This should be a soft delete (flip is_active = false), consistent with how sensors and zones handle deletion in your system.
 Response:
 json{
