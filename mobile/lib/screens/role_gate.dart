@@ -52,22 +52,18 @@ class _RoleGateState extends State<RoleGate>
         debugPrint('[RoleGate] Warning: Could not extract JWT token from Clerk session');
       }
 
-      // ── 2. Call backend /api/auth/me ───────────────────────
-      final meResponse = await ApiService.getMe();
+      // ── 2. Extract Role from Clerk User Metadata ───────────
+      final user = clerkAuth.client?.user;
+      final metadata = user?.publicMetadata ?? {};
+      final role = metadata['role'] as String? ?? 'citizen';
 
-      if (meResponse != null && mounted) {
-        final user = meResponse['user'] as Map<String, dynamic>? ?? {};
-        final roles = List<String>.from(user['roles'] ?? []);
-
-        if (roles.contains('admin') || roles.contains('field_officer')) {
-          Navigator.of(context).pushReplacementNamed('/access-restricted');
-          return;
-        }
-      }
-
-      // ── 3. Citizen or fallback → continue to app ───────────
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/onboarding');
+        if (role == 'admin' || role == 'field_officer') {
+          Navigator.of(context).pushReplacementNamed('/access-restricted');
+        } else {
+          // Citizen or fallback → continue to app
+          Navigator.of(context).pushReplacementNamed('/onboarding');
+        }
       }
     } catch (e, st) {
       debugPrint('[RoleGate] Error checking role: $e\n$st');
