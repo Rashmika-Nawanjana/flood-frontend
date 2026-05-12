@@ -110,3 +110,4 @@ Always keep dev updated before creating new branches.
 Never merge without a PR.
 Never commit directly to protected branches.
 Commit messages MUST follow the enforced format.
+
