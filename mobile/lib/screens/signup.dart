@@ -1,8 +1,8 @@
 import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 
-class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +15,7 @@ class SignInScreen extends StatelessWidget {
         });
 
         return const Scaffold(
-          backgroundColor: Color(0xFF0D1B2A),
-          body: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Color(0xFF42A5F5)),
-            ),
-          ),
+          body: Center(child: CircularProgressIndicator()),
         );
       },
 
@@ -42,10 +37,10 @@ class SignInScreen extends StatelessWidget {
 
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/sign-up');
+                      Navigator.pushNamed(context, '/sign-in');
                     },
                     child: const Text(
-                      "Don't have an account? Sign up",
+                      "Already have an account? Sign in",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

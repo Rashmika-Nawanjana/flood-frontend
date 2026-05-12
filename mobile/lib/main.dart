@@ -1,5 +1,7 @@
-import 'package:clerk_auth/clerk_auth.dart' show Persistor;
+import 'package:clerk_auth/clerk_auth.dart';
 import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:flood_frontend/screens/signup.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,15 +26,24 @@ void main() async {
     ),
   );
 
-  runApp(
-    ClerkAuth(
+  runApp(const MyRootApp());
+}
+
+class MyRootApp extends StatelessWidget {
+  const MyRootApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClerkAuth(
       config: ClerkAuthConfig(
-        publishableKey: 'pk_test...', // ← replace the key
+        publishableKey:
+            'pk_test_dXNlZnVsLWhlbi0xMy5jbGVyay5hY2NvdW50cy5kZXYk',
+
         persistor: Persistor.none,
       ),
       child: const FloodSenseApp(),
-    ),
-  );
+    );
+  }
 }
 
 class FloodSenseApp extends StatefulWidget {
@@ -45,7 +56,7 @@ class FloodSenseApp extends StatefulWidget {
 class _FloodSenseAppState extends State<FloodSenseApp> {
   @override
   void dispose() {
-    SocketService.instance.disconnect();
+      SocketService.instance.disconnect();
     super.dispose();
   }
 
@@ -55,10 +66,13 @@ class _FloodSenseAppState extends State<FloodSenseApp> {
       title: 'FloodSense LK',
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(),
+
       routes: {
         '/sign-in': (context) => const SignInScreen(),
+        '/sign-up': (context) => const SignUpScreen(),
         '/onboarding': (context) => const SplashScreen(),
       },
+
       home: const SignInScreen(),
     );
   }
@@ -71,56 +85,10 @@ class _FloodSenseAppState extends State<FloodSenseApp> {
       useMaterial3: true,
       scaffoldBackgroundColor: bgGray,
       primaryColor: primaryBlue,
+      fontFamily: 'Outfit',
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryBlue,
         brightness: Brightness.light,
-      ),
-      fontFamily: 'Outfit',
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Color(0xFF1F2937),
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          fontFamily: 'Outfit',
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF1F2937),
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryBlue,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          textStyle: const TextStyle(
-            fontFamily: 'Outfit',
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primaryBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          textStyle: const TextStyle(
-            fontFamily: 'Outfit',
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-      ),
-      cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: Colors.white,
       ),
     );
   }
