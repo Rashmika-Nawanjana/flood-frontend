@@ -122,6 +122,22 @@ class ApiService {
     return [];
   }
 
+  // ── Auth / Me ────────────────────────────────────────────────────────────────
+
+  /// Fetch the authenticated user's profile (includes roles).
+  static Future<Map<String, dynamic>?> getMe() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/auth/me'),
+        headers: await _headers(),
+      );
+      if (res.statusCode == 200) return jsonDecode(res.body);
+    } catch (e) {
+      _log('getMe', e);
+    }
+    return null;
+  }
+
   // ── Utilities ─────────────────────────────────────────────────────────────────
   static void _log(String method, Object e) =>
       // ignore: avoid_print

@@ -4,8 +4,9 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useAlertStore } from '@/store/useAlertStore';
+import { useAnomalyStore } from '@/store/useAnomalyStore';
 import { api } from '@/lib/api';
-import type { Sensor, ApiResponse, SensorUpdateEvent, Alert } from '@/lib/types';
+import type { Sensor, ApiResponse, SensorUpdateEvent, Alert, Anomaly } from '@/lib/types';
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -86,6 +87,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       if (payload?.data) useAlertStore.getState().addAlert(payload.data);
     });
 
+    socket.on('anomaly:new', (payload: { data: Anomaly }) => {
+      if (payload?.data) useAnomalyStore.getState().addAnomaly(payload.data);
+    });
+
     socket.on('disconnect', () => {
       console.warn('[FloodSense] Socket.IO disconnected');
       setIsConnected(false);
@@ -97,6 +102,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off('sensor:update');
       socket.off('sensor:offline');
       socket.off('alert:new');
+      socket.off('anomaly:new');
       socket.disconnect();
       socketRef.current = null;
     };
