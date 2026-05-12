@@ -11,7 +11,8 @@
     "start": "next start",
     "start:prod": "NODE_ENV=production next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:routing": "node scripts/test-routing.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.6",
