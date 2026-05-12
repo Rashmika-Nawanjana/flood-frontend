@@ -29,6 +29,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     const socket = io(wsUrl, {
+      path: '/ws/live/socket.io',
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 10,
