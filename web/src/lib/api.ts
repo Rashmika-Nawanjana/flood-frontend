@@ -9,11 +9,9 @@
 
 import type { User } from './types';
 
-// Kong gateway base URL (no trailing slash, no /api suffix)
-const GATEWAY_BASE =
-  process.env.NEXT_PUBLIC_GATEWAY_URL ||
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ||
-  "http://localhost:80";
+// Use relative paths so Next.js rewrites in next.config.js proxy requests to Kong server-side,
+// avoiding HTTPS→HTTP mixed-content blocks when the frontend is on Vercel (HTTPS).
+const GATEWAY_BASE = "";
 
 async function getAuthToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
@@ -41,7 +39,8 @@ async function fetcher<T>(
   endpoint: string,
   params?: Record<string, string>,
 ): Promise<T> {
-  const url = new URL(`${GATEWAY_BASE}${endpoint}`);
+  const base = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const url = new URL(`${GATEWAY_BASE}${endpoint}`, base);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value) url.searchParams.append(key, value);
