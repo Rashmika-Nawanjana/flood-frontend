@@ -53,7 +53,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     if (currentUser && currentUser.role !== 'admin') {
-      router.push('/dashboard');
+      router.push('/');
     }
   }, [currentUser, router]);
 

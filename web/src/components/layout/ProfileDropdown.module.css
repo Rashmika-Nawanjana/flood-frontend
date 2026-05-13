@@ -174,17 +174,12 @@
   align-items: center;
   gap: 12px;
   transition: all var(--transition-fast);
+  text-decoration: none;
 }
 
-.menuItem:hover:not(:disabled) {
+.menuItem:hover {
   background-color: var(--bg-surface-high);
   color: var(--primary);
-}
-
-.menuItem:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  color: var(--text-muted);
 }
 
 .menuItem svg {

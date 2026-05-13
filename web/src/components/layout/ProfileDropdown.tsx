@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './ProfileDropdown.module.css';
 
 export default function ProfileDropdown({
@@ -108,14 +109,22 @@ export default function ProfileDropdown({
           <div className={styles.divider} />
 
           {/* Menu Items */}
-          <button className={styles.menuItem} disabled>
+          <Link
+            href="/profile"
+            className={styles.menuItem}
+            onClick={() => setIsOpen(false)}
+          >
             <User size={18} />
             <span>View Profile</span>
-          </button>
-          <button className={styles.menuItem} disabled>
+          </Link>
+          <Link
+            href="/settings"
+            className={styles.menuItem}
+            onClick={() => setIsOpen(false)}
+          >
             <Settings size={18} />
             <span>Settings</span>
-          </button>
+          </Link>
 
           <div className={styles.divider} />
 
