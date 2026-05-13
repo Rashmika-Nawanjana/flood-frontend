@@ -107,14 +107,24 @@ export const api = {
   },
 
   zones: {
-    list: async (zoneId?: string | null) => {
+    list: async (zoneId?: string | null, includeShelters = false) => {
       if (zoneId) {
-        const res = await fetcher<{ data: any }>(`/v1/zones/${zoneId}`);
+        const res = await fetcher<ApiResponse<Zone>>(`/v1/zones/${zoneId}`);
         return { ...res, data: res.data ? [res.data] : [] };
       }
-      return fetcher("/v1/zones");
+      
+      const listRes = await fetcher<ApiResponse<Zone[]>>("/v1/zones");
+      if (includeShelters && listRes.data) {
+        const detailPromises = listRes.data.map((z) => fetcher<ApiResponse<Zone>>(`/v1/zones/${z.zone_id}`));
+        const details = await Promise.allSettled(detailPromises);
+        const fullZones = details
+          .filter((res) => res.status === 'fulfilled')
+          .map((res) => (res as PromiseFulfilledResult<ApiResponse<Zone>>).value.data);
+        return { ...listRes, data: fullZones };
+      }
+      return listRes;
     },
-    get: (id: string) => fetcher(`/v1/zones/${id}`),
+    get: (id: string) => fetcher<ApiResponse<Zone>>(`/v1/zones/${id}`),
     create: (data: unknown) => mutate("POST", "/api/admin/zones", data),
     update: (id: string, data: unknown) =>
       mutate("PATCH", `/api/admin/zones/${id}`, data),

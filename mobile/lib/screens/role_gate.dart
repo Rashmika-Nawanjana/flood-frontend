@@ -18,7 +18,6 @@ class RoleGate extends StatefulWidget {
 
 class _RoleGateState extends State<RoleGate>
     with SingleTickerProviderStateMixin {
-  bool _checking = true;
   late AnimationController _pulseCtrl;
 
   @override
@@ -42,13 +41,12 @@ class _RoleGateState extends State<RoleGate>
     try {
       // ── 1. Grab Clerk session token ────────────────────────
       final clerkAuth = ClerkAuth.of(context, listen: false);
-      final session = clerkAuth.session ?? clerkAuth.client?.sessions.firstOrNull;
-      
-      // Fetch token with 'flood-app' template to include custom metadata (roles)
-      final jwtToken = await session?.getToken(template: 'flood-app');
-      final jwt = jwtToken?.jwt;
 
-      if (jwt != null) {
+      // Fetch token with 'flood-app' template to include custom metadata (roles)
+      final jwtToken = await clerkAuth.sessionToken(templateName: 'flood-app');
+      final jwt = jwtToken.jwt;
+
+      if (jwt.isNotEmpty) {
         AuthStore.setToken(jwt);
       } else {
         debugPrint('[RoleGate] Warning: Could not extract JWT token with template "flood-app"');
@@ -56,7 +54,7 @@ class _RoleGateState extends State<RoleGate>
 
 
       // ── 2. Extract Role from Clerk User Metadata ───────────
-      final user = clerkAuth.client?.user;
+      final user = clerkAuth.client.user;
       final metadata = user?.publicMetadata ?? {};
       final role = metadata['role'] as String? ?? 'citizen';
 
@@ -93,7 +91,7 @@ class _RoleGateState extends State<RoleGate>
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF1565C0).withOpacity(0.15),
+                    color: const Color(0xFF1565C0).withValues(alpha: 0.15),
                   ),
                   child: const Icon(
                     Icons.tsunami,
@@ -116,7 +114,7 @@ class _RoleGateState extends State<RoleGate>
             Text(
               'Verifying access…',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
