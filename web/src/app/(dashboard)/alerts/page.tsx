@@ -1,12 +1,10 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
 import Modal from '@/components/ui/Modal';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useZoneStore } from '@/store/useZoneStore';
 import { api } from '@/lib/api';
 import type { Alert, ApiResponse } from '@/lib/types';
 import styles from './page.module.css';
@@ -16,23 +14,12 @@ export default function AlertsPage() {
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
-  const [showCreate, setShowCreate] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [createForm, setCreateForm] = useState({
-    zone_id: '',
-    severity: 'WARNING',
-    title: '',
-    message: '',
-    affected_population: '',
-    recommended_action: 'EVACUATE',
-  });
   const [showResolve, setShowResolve] = useState(false);
   const [resolutionNote, setResolutionNote] = useState('');
   const [resolveError, setResolveError] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
 
   const { user, isAuthenticated } = useAuthStore();
-  const zones = useZoneStore((s) => s.zones);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
@@ -58,78 +45,6 @@ export default function AlertsPage() {
   const closeResolve = () => {
     setShowResolve(false);
     setResolveError(null);
-  };
-
-  const openCreate = () => {
-    setCreateError(null);
-    setCreateForm({
-      zone_id: '',
-      severity: 'WARNING',
-      title: '',
-      message: '',
-      affected_population: '',
-      recommended_action: 'EVACUATE',
-    });
-    setShowCreate(true);
-  };
-
-  const closeCreate = () => {
-    setShowCreate(false);
-    setCreateError(null);
-  };
-
-  const handleCreate = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const population = Number(createForm.affected_population);
-    if (!createForm.zone_id.trim()) {
-      setCreateError('Zone selection is required.');
-      return;
-    }
-
-    const selectedZone = zones.find((z) => z.zone_id === createForm.zone_id.trim());
-    if (!selectedZone) {
-      setCreateError('Selected zone is not available.');
-      return;
-    }
-    if (!createForm.title.trim() || !createForm.message.trim()) {
-      setCreateError('Title and message are required.');
-      return;
-    }
-    if (!Number.isFinite(population) || population < 0) {
-      setCreateError('Affected population must be a valid number.');
-      return;
-    }
-
-    const severity = createForm.severity as Alert['severity'];
-    const severityCode = {
-      LOW: 1,
-      WARNING: 2,
-      HIGH: 3,
-      CRITICAL: 4,
-      EMERGENCY: 5,
-    }[severity] || 0;
-    const timestamp = new Date().toISOString();
-    const newAlert: Alert = {
-      alert_id: `UI-${Date.now()}`,
-      zone_id: createForm.zone_id.trim(),
-      zone_name: selectedZone.zone_name || selectedZone.zone_id,
-      severity,
-      severity_code: severityCode,
-      title: createForm.title.trim(),
-      message: createForm.message.trim(),
-      triggered_at: timestamp,
-      triggered_by: 'MANUAL_ADMIN',
-      status: 'ACTIVE',
-      resolved_at: null,
-      affected_population: population,
-      recommended_action: createForm.recommended_action.trim() || 'EVACUATE',
-      notifications_sent: { push: 0, sms: 0, email: 0 },
-    };
-
-    setAlerts((prev) => [newAlert, ...prev]);
-    setSelected(newAlert);
-    setShowCreate(false);
   };
 
   const handleResolve = async (event: FormEvent<HTMLFormElement>) => {
@@ -176,9 +91,6 @@ export default function AlertsPage() {
           <h1 className={styles.title}>Alert Management</h1>
           <p className={styles.subtitle}>Monitor and manage emergency alerts across the monitored catchments.</p>
         </div>
-        <RoleGate allowed={['admin']}>
-          <button className={styles.createBtn} onClick={openCreate}><Plus size={16} /> Create Alert</button>
-        </RoleGate>
       </div>
 
       <div className={styles.filters}>
@@ -285,90 +197,6 @@ export default function AlertsPage() {
         </form>
       </Modal>
 
-      <Modal isOpen={showCreate} onClose={closeCreate} title="Create Alert" width="640px">
-        <form className={styles.form} onSubmit={handleCreate}>
-          <div className={styles.formRow}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Zone ID</label>
-              <select
-                className={styles.formSelect}
-                value={createForm.zone_id}
-                onChange={(e) => setCreateForm((p) => ({ ...p, zone_id: e.target.value }))}
-                required
-              >
-                <option value="">Select Zone</option>
-                {zones.map((zone) => (
-                  <option key={zone.zone_id} value={zone.zone_id}>
-                    {zone.zone_name || zone.zone_id}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className={styles.formRow}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Severity</label>
-              <select
-                className={styles.formSelect}
-                value={createForm.severity}
-                onChange={(e) => setCreateForm((p) => ({ ...p, severity: e.target.value }))}
-              >
-                <option value="CRITICAL">CRITICAL</option>
-                <option value="HIGH">HIGH</option>
-                <option value="WARNING">WARNING</option>
-                <option value="LOW">LOW</option>
-              </select>
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Affected Population</label>
-              <input
-                className={styles.formInput}
-                type="number"
-                min="0"
-                placeholder="12500"
-                value={createForm.affected_population}
-                onChange={(e) => setCreateForm((p) => ({ ...p, affected_population: e.target.value }))}
-                required
-              />
-            </div>
-          </div>
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>Title</label>
-            <input
-              className={styles.formInput}
-              placeholder="Evacuation Warning: Getambe Lowlands"
-              value={createForm.title}
-              onChange={(e) => setCreateForm((p) => ({ ...p, title: e.target.value }))}
-              required
-            />
-          </div>
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>Message</label>
-            <textarea
-              className={styles.formTextarea}
-              rows={4}
-              placeholder="Water levels are rising rapidly. Please evacuate to the nearest designated shelter immediately."
-              value={createForm.message}
-              onChange={(e) => setCreateForm((p) => ({ ...p, message: e.target.value }))}
-              required
-            />
-          </div>
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>Recommended Action</label>
-            <input
-              className={styles.formInput}
-              placeholder="EVACUATE"
-              value={createForm.recommended_action}
-              onChange={(e) => setCreateForm((p) => ({ ...p, recommended_action: e.target.value }))}
-            />
-          </div>
-          {createError && <p className={styles.formError}>{createError}</p>}
-          <div className={styles.formActions}>
-            <button className={styles.cancelBtn} type="button" onClick={closeCreate}>Cancel</button>
-            <button className={styles.submitBtn} type="submit">Create Alert</button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }
