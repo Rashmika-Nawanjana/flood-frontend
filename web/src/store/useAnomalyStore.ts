@@ -6,7 +6,7 @@ interface AnomalyState {
   anomalies: Anomaly[];
   setAnomalies: (anomalies: Anomaly[]) => void;
   addAnomaly: (anomaly: Anomaly) => void;
-  resolveAnomaly: (id: string) => void;
+  resolveAnomaly: (id: string, status?: 'RESOLVED' | 'FALSE_ALARM') => void;
 }
 
 export const useAnomalyStore = create<AnomalyState>()(
@@ -16,12 +16,12 @@ export const useAnomalyStore = create<AnomalyState>()(
       setAnomalies: (anomalies) => set({ anomalies }),
       addAnomaly: (anomaly) =>
         set((state) => ({ anomalies: [anomaly, ...state.anomalies] })),
-      resolveAnomaly: (id) =>
-        set((state) => ({
-          anomalies: state.anomalies.map((a) =>
-            a.anomaly_id === id ? { ...a, status: 'RESOLVED' as const } : a
-          ),
-        })),
+  resolveAnomaly: (id, status = 'RESOLVED') =>
+    set((state) => ({
+      anomalies: state.anomalies.map((a) =>
+        a.anomaly_id === id ? { ...a, status: status as 'RESOLVED' | 'FALSE_ALARM' } : a
+      ),
+    })),
     }),
     { name: 'AnomalyStore' }
   )

@@ -44,13 +44,16 @@ class _RoleGateState extends State<RoleGate>
       final clerkAuth = ClerkAuth.of(context, listen: false);
       final session = clerkAuth.session ?? clerkAuth.client?.sessions.firstOrNull;
       
-      final jwt = session?.lastActiveToken?.jwt;
+      // Fetch token with 'flood-app' template to include custom metadata (roles)
+      final jwtToken = await session?.getToken(template: 'flood-app');
+      final jwt = jwtToken?.jwt;
 
       if (jwt != null) {
         AuthStore.setToken(jwt);
       } else {
-        debugPrint('[RoleGate] Warning: Could not extract JWT token from Clerk session');
+        debugPrint('[RoleGate] Warning: Could not extract JWT token with template "flood-app"');
       }
+
 
       // ── 2. Extract Role from Clerk User Metadata ───────────
       final user = clerkAuth.client?.user;

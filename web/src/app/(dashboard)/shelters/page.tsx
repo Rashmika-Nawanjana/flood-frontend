@@ -1,40 +1,101 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { MoreVertical, Plus } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import ProgressBar from '@/components/ui/ProgressBar';
 import RoleGate from '@/components/auth/RoleGate';
 import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
-import type { Zone, Shelter, ApiResponse } from '@/lib/types';
+import type { ApiResponse, Shelter } from '@/lib/types';
 import { useShelterStore } from '@/store/useShelterStore';
+import { useZoneStore } from '@/store/useZoneStore';
 import styles from './page.module.css';
 
+type ShelterFormData = {
+  zone_id: string;
+  name: string;
+  lat: string;
+  lng: string;
+  capacity: string;
+  contact_number: string;
+  status: NonNullable<Shelter['status']>;
+};
+
+const initialFormData: ShelterFormData = {
+  zone_id: 'ZONE-K1',
+  name: 'Getambe Temple Hall',
+  lat: '7.2715',
+  lng: '80.6125',
+  capacity: '400',
+  contact_number: '+94812222222',
+  status: 'OPEN',
+};
+
 export default function SheltersPage() {
-  const shelters = useShelterStore(s => s.shelters);
+  const shelters = useShelterStore((s) => s.shelters);
+  const addShelter = useShelterStore((s) => s.addShelter);
+  const zones = useZoneStore((s) => s.zones);
   const [showCreate, setShowCreate] = useState(false);
-  const [formData, setFormData] = useState({ name: '', zone_id: '', capacity: '', contact_number: '' });
+  const [formData, setFormData] = useState<ShelterFormData>(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const totalCapacity = shelters.reduce((s, sh) => s + sh.capacity, 0);
   const totalOccupancy = shelters.reduce((s, sh) => s + (sh.current_occupancy || 0), 0);
-  const fullCount = shelters.filter(s => s.status === 'FULL').length;
-  const openCount = shelters.filter(s => s.status === 'OPEN' || !s.status).length;
+  const fullCount = shelters.filter((s) => s.status === 'FULL').length;
+  const openCount = shelters.filter((s) => s.status === 'OPEN' || !s.status).length;
 
-  const handleCreate = async () => {
+  const closeCreateForm = () => {
+    setShowCreate(false);
+    setFormError(null);
+  };
+
+  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+
+    const payload = {
+      zone_id: formData.zone_id.trim(),
+      name: formData.name.trim(),
+      lat: Number(formData.lat),
+      lng: Number(formData.lng),
+      capacity: Number(formData.capacity),
+      contact_number: formData.contact_number.trim(),
+      status: formData.status,
+    };
+
+    if (!payload.zone_id || !payload.name || !payload.contact_number) {
+      setFormError('Zone, shelter name, and contact number are required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!Number.isFinite(payload.lat) || !Number.isFinite(payload.lng) || !Number.isFinite(payload.capacity)) {
+      setFormError('Latitude, longitude, and capacity must be valid numbers.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (payload.capacity <= 0) {
+      setFormError('Capacity must be greater than zero.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      await api.shelters.create({
-        name: formData.name,
-        zone_id: formData.zone_id,
-        capacity: parseInt(formData.capacity),
-        contact_number: formData.contact_number,
-        lat: 7.27,
-        lng: 80.61,
-        status: 'OPEN',
-      });
+      const res = (await api.shelters.create(payload)) as ApiResponse<Shelter> | Shelter;
+      const createdShelter = 'data' in res ? res.data : res;
+      addShelter(createdShelter);
       setShowCreate(false);
-      setFormData({ name: '', zone_id: '', capacity: '', contact_number: '' });
-    } catch (e) { console.error(e); }
+      setFormData(initialFormData);
+    } catch (e) {
+      console.error(e);
+      setFormError('Failed to register shelter. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,7 +106,9 @@ export default function SheltersPage() {
           <p className={styles.subtitle}>Strategic coordination of emergency housing and humanitarian resources</p>
         </div>
         <RoleGate allowed={['admin']}>
-          <button className={styles.addBtn} onClick={() => setShowCreate(true)}><Plus size={16} /> Add New Shelter</button>
+          <button className={styles.addBtn} onClick={() => setShowCreate(true)}>
+            <Plus size={16} /> Add New Shelter
+          </button>
         </RoleGate>
       </div>
 
@@ -57,7 +120,9 @@ export default function SheltersPage() {
       </div>
 
       <div className={styles.capacityBar}>
-        <span className={styles.capacityLabel}>Overall Capacity: {totalOccupancy.toLocaleString()}/{totalCapacity.toLocaleString()}</span>
+        <span className={styles.capacityLabel}>
+          Overall Capacity: {totalOccupancy.toLocaleString()}/{totalCapacity.toLocaleString()}
+        </span>
         <ProgressBar value={totalOccupancy} max={totalCapacity || 1} height={10} />
       </div>
 
@@ -94,7 +159,9 @@ export default function SheltersPage() {
                 <td className={styles.monoCell}>{sh.contact_number}</td>
                 <td>
                   <RoleGate allowed={['admin']}>
-                    <button className={styles.menuBtn}>⋮</button>
+                    <button className={styles.menuBtn} aria-label={`Manage ${sh.name}`}>
+                      <MoreVertical size={16} />
+                    </button>
                   </RoleGate>
                 </td>
               </tr>
@@ -106,35 +173,108 @@ export default function SheltersPage() {
         </table>
       </div>
 
-      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Register New Shelter">
-        <div className={styles.form}>
+      <Modal isOpen={showCreate} onClose={closeCreateForm} title="Register New Shelter">
+        <form className={styles.form} onSubmit={handleCreate}>
           <div className={styles.formField}>
             <label className={styles.formLabel}>Shelter Name</label>
-            <input className={styles.formInput} placeholder="e.g. Community Center Annex" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} />
+            <input
+              className={styles.formInput}
+              placeholder="Getambe Temple Hall"
+              value={formData.name}
+              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              required
+            />
           </div>
           <div className={styles.formRow}>
             <div className={styles.formField}>
               <label className={styles.formLabel}>Strategic Zone</label>
-              <select className={styles.formSelect} value={formData.zone_id} onChange={(e) => setFormData(p => ({ ...p, zone_id: e.target.value }))}>
+              <select
+                className={styles.formSelect}
+                value={formData.zone_id}
+                onChange={(e) => setFormData((p) => ({ ...p, zone_id: e.target.value }))}
+                required
+              >
                 <option value="">Select Zone</option>
-                <option value="ZONE-K1">Central Zone</option>
-                <option value="ZONE-K2">Western Zone</option>
+                {zones.map((zone) => (
+                  <option key={zone.zone_id} value={zone.zone_id}>
+                    {zone.zone_name || zone.zone_id}
+                  </option>
+                ))}
+                {zones.length === 0 && <option value="ZONE-K1">ZONE-K1</option>}
               </select>
             </div>
             <div className={styles.formField}>
               <label className={styles.formLabel}>Total Capacity</label>
-              <input className={styles.formInput} type="number" placeholder="500" value={formData.capacity} onChange={(e) => setFormData(p => ({ ...p, capacity: e.target.value }))} />
+              <input
+                className={styles.formInput}
+                type="number"
+                min="1"
+                placeholder="400"
+                value={formData.capacity}
+                onChange={(e) => setFormData((p) => ({ ...p, capacity: e.target.value }))}
+                required
+              />
             </div>
           </div>
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>Primary Contact Number</label>
-            <input className={styles.formInput} placeholder="+94 XX XXX XXXX" value={formData.contact_number} onChange={(e) => setFormData(p => ({ ...p, contact_number: e.target.value }))} />
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Latitude</label>
+              <input
+                className={styles.formInput}
+                type="number"
+                step="any"
+                placeholder="7.2715"
+                value={formData.lat}
+                onChange={(e) => setFormData((p) => ({ ...p, lat: e.target.value }))}
+                required
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Longitude</label>
+              <input
+                className={styles.formInput}
+                type="number"
+                step="any"
+                placeholder="80.6125"
+                value={formData.lng}
+                onChange={(e) => setFormData((p) => ({ ...p, lng: e.target.value }))}
+                required
+              />
+            </div>
           </div>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Primary Contact Number</label>
+              <input
+                className={styles.formInput}
+                placeholder="+94812222222"
+                value={formData.contact_number}
+                onChange={(e) => setFormData((p) => ({ ...p, contact_number: e.target.value }))}
+                required
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Status</label>
+              <select
+                className={styles.formSelect}
+                value={formData.status}
+                onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value as ShelterFormData['status'] }))}
+              >
+                <option value="OPEN">OPEN</option>
+                <option value="FILLING">FILLING</option>
+                <option value="FULL">FULL</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+            </div>
+          </div>
+          {formError && <p className={styles.formError}>{formError}</p>}
           <div className={styles.formActions}>
-            <button className={styles.cancelBtn} onClick={() => setShowCreate(false)}>Cancel</button>
-            <button className={styles.submitBtn} onClick={handleCreate}>Register</button>
+            <button className={styles.cancelBtn} type="button" onClick={closeCreateForm}>Cancel</button>
+            <button className={styles.submitBtn} type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Registering...' : 'Register'}
+            </button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

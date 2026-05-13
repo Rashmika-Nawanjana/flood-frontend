@@ -16,30 +16,10 @@ class SignInScreen extends StatelessWidget {
       signedOutBuilder: (context, authState) {
         return Scaffold(
           backgroundColor: const Color(0xFF0D1B2A),
-          body: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: ClerkAuthentication(),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/sign-up');
-                    },
-                    child: const Text(
-                      "Don't have an account? Sign up",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
+          body: const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: ClerkAuthentication(),
             ),
           ),
         );

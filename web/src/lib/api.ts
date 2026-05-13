@@ -18,15 +18,18 @@ async function getAuthToken(): Promise<string | null> {
   try {
     const clerk = (
       window as unknown as {
-        Clerk?: { session?: { getToken: () => Promise<string> } };
+        Clerk?: { session?: { getToken: (options?: { template?: string }) => Promise<string> } };
       }
     ).Clerk;
     if (!clerk?.session) return null;
-    return await clerk.session.getToken();
+    
+    const template = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
+    return await clerk.session.getToken(template ? { template } : undefined);
   } catch {
     return null;
   }
 }
+
 
 async function fetcher<T>(
   endpoint: string,
@@ -162,7 +165,7 @@ export const api = {
     resolve: (
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },
-    ) => mutate("PATCH", `/api/admin/anomalies/${id}`, data),
+    ) => mutate("PATCH", `/api/v1/admin/anomalies/${id}`, data),
   },
 
   auth: {
@@ -185,6 +188,14 @@ export const api = {
         mutate<unknown>("PATCH", `/api/admin/users/${clerkId}`, data),
       deactivate: (clerkId: string) =>
         mutate<unknown>("DELETE", `/api/admin/users/${clerkId}`),
+    },
+    alerts: {
+      resolve: (alertId: string, data: { resolution_note: string }) =>
+        mutate("PATCH", `/api/v1/admin/alerts/${alertId}`, data),
+    },
+    rivers: {
+      list: () => fetcher<{ data: { river_id: number; river_name: string }[] }>("/api/v1/admin/rivers"),
+      create: (data: unknown) => mutate("POST", "/api/v1/admin/rivers", data),
     },
   },
 };
