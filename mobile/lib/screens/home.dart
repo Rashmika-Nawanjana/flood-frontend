@@ -27,6 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // Alerts (FIXED TYPE)
   List<Map<String, dynamic>> _alerts = [];
 
+  // Shelters
+  List<dynamic> _shelters = [];
+
   bool _isLoading = true;
 
   // Socket / live banner
@@ -141,16 +144,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _applyZone(Map zone) {
     _zoneId = zone['zone_id']?.toString();
-
     _city = zone['zone_name']?.toString() ?? 'Unknown';
-
     _riskLevel = zone['risk_level']?.toString() ?? 'UNKNOWN';
-
+    
     final colorStr = zone['color_code']?.toString() ?? '#607D8B';
-
     _riskColor = Color(
       int.parse(colorStr.replaceAll('#', '0xFF')),
     );
+
+    // Extract shelters for the zone
+    _shelters = zone['shelters'] as List? ?? [];
   }
 
   // ── LAST SEEN ─────────────────────────────────────────
@@ -243,7 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             _buildLiveConnectionChip(),
                             const SizedBox(height: 14),
                             _buildAlertSummary(),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 20),
+                            _buildSheltersSummary(),
+                            const SizedBox(height: 20),
                             _buildRecentAlerts(),
                             const SizedBox(height: 24),
                           ]),
@@ -306,6 +311,76 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ── SHELTER SUMMARY ───────────────────────────────────
+
+  Widget _buildSheltersSummary() {
+    if (_shelters.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            'AVAILABLE SHELTERS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _shelters.length,
+            itemBuilder: (context, index) {
+              final s = _shelters[index];
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      s['name'] ?? 'Shelter',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.people_outline, size: 14, color: Colors.blue),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Cap: ${s['capacity'] ?? '??'}',
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   // ── ALERT SUMMARY ─────────────────────────────────────
 
   Widget _buildAlertSummary() {
@@ -313,11 +388,39 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _getLastSeen(),
       builder: (context, snap) {
         final summary = _buildSummary(snap.data);
+        final total = summary.values.fold(0, (a, b) => a + b);
+
+        if (total == 0) return const SizedBox.shrink();
 
         return Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
           child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(summary.toString()),
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.notification_important_outlined, color: Colors.orange),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$total New Alerts Detected',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Stay updated with the latest conditions in $_city.',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

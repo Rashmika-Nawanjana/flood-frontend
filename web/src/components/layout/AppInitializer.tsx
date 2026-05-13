@@ -32,7 +32,7 @@ export default function AppInitializer() {
       try {
         const [sensorRes, zoneRes, alertRes] = await Promise.allSettled([
           api.sensors.list(user!.zone_id),
-          api.zones.list(user!.zone_id),
+          api.zones.list(user!.zone_id, true), // Fetch shelters too
           api.alerts.list(undefined, user!.zone_id),
         ]);
 
@@ -45,8 +45,11 @@ export default function AppInitializer() {
           const d = zoneRes.value as ApiResponse<Zone[]>;
           const zones = d.data || [];
           useZoneStore.getState().setZones(zones);
-          const shelters = zones.flatMap((z) => z.shelters || []);
-          useShelterStore.getState().setShelters(shelters as Shelter[]);
+
+          // Both admins and officers now get zones with nested shelters
+          // Aggregate them into the ShelterStore
+          const allShelters = zones.flatMap((z) => z.shelters || []);
+          useShelterStore.getState().setShelters(allShelters as Shelter[]);
         }
 
         if (alertRes.status === 'fulfilled') {
