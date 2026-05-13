@@ -18,22 +18,18 @@ async function getAuthToken(): Promise<string | null> {
   try {
     const clerk = (
       window as unknown as {
-        Clerk?: {
-          session?: {
-            getToken: (options?: { template?: string }) => Promise<string>;
-          };
-        };
+        Clerk?: { session?: { getToken: (options?: { template?: string }) => Promise<string> } };
       }
     ).Clerk;
     if (!clerk?.session) return null;
-    // Must pass a JWT template so the token includes publicMetadata (role).
-    // Default Clerk session tokens do not include custom metadata claims.
+    
     const template = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
     return await clerk.session.getToken(template ? { template } : undefined);
   } catch {
     return null;
   }
 }
+
 
 async function fetcher<T>(
   endpoint: string,
@@ -169,7 +165,7 @@ export const api = {
     resolve: (
       id: string,
       data: { status: string; resolution_note: string; resolved_by: string },
-    ) => mutate("PATCH", `/api/admin/anomalies/${id}`, data),
+    ) => mutate("PATCH", `/api/v1/admin/anomalies/${id}`, data),
   },
 
   auth: {
