@@ -18,15 +18,18 @@ async function getAuthToken(): Promise<string | null> {
   try {
     const clerk = (
       window as unknown as {
-        Clerk?: { session?: { getToken: () => Promise<string> } };
+        Clerk?: { session?: { getToken: (options?: { template?: string }) => Promise<string> } };
       }
     ).Clerk;
     if (!clerk?.session) return null;
-    return await clerk.session.getToken();
+    
+    const template = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
+    return await clerk.session.getToken(template ? { template } : undefined);
   } catch {
     return null;
   }
 }
+
 
 async function fetcher<T>(
   endpoint: string,

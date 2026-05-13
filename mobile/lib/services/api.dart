@@ -15,7 +15,7 @@ class AuthStore {
 class ApiService {
   // ── Environment config ──────────────────────────────────────────────────────
   static const String _dev = 'http://10.0.2.2:8000';
-  static const String _stg = 'https://stg.floodsense.lk';
+  static const String _stg = 'https://flood-stg.157-245-102-69.sslip.io';
   static const String _prod = 'https://api.example.com';
 
 
@@ -37,10 +37,10 @@ class ApiService {
   static Future<List<dynamic>> getZones() async {
     try {
       final res = await http.get(
-        Uri.parse('$baseUrl/api/v1/zones'),
+        Uri.parse('$baseUrl/v1/zones'),
         headers: await _headers(),
       );
-      if (res.statusCode == 200) return jsonDecode(res.body);
+      if (res.statusCode == 200) return jsonDecode(res.body)['data'] ?? [];
     } catch (e) {
       _log('getZones', e);
     }
@@ -51,10 +51,10 @@ class ApiService {
   static Future<Map<String, dynamic>?> getZone(String zoneId) async {
     try {
       final res = await http.get(
-        Uri.parse('$baseUrl/api/v1/zones/$zoneId'),
+        Uri.parse('$baseUrl/v1/zones/$zoneId'),
         headers: await _headers(),
       );
-      if (res.statusCode == 200) return jsonDecode(res.body);
+      if (res.statusCode == 200) return jsonDecode(res.body)['data'];
     } catch (e) {
       _log('getZone($zoneId)', e);
     }
@@ -71,18 +71,17 @@ class ApiService {
     int limit = 50,
   }) async {
     final params = <String, String>{
-      'zone_id': zoneId,
       'limit': limit.toString(),
       if (severity != null) 'severity': severity,
       if (status != null) 'status': status,
     };
 
-    final uri = Uri.parse('$baseUrl/api/v1/alerts')
+    final uri = Uri.parse('$baseUrl/v1/zones/$zoneId/alerts')
         .replace(queryParameters: params);
 
     try {
       final res = await http.get(uri, headers: await _headers());
-      if (res.statusCode == 200) return jsonDecode(res.body);
+      if (res.statusCode == 200) return jsonDecode(res.body)['data'] ?? [];
     } catch (e) {
       _log('getAlerts', e);
     }
@@ -94,12 +93,14 @@ class ApiService {
   /// Resolve (lat, lng) → zone
   static Future<Map<String, dynamic>?> resolveZone(
       double lat, double lng) async {
-    final uri = Uri.parse('$baseUrl/api/v1/resolve-zone').replace(
-      queryParameters: {'lat': lat.toString(), 'lng': lng.toString()},
-    );
+    final uri = Uri.parse('$baseUrl/v1/location/resolve');
     try {
-      final res = await http.get(uri, headers: await _headers());
-      if (res.statusCode == 200) return jsonDecode(res.body);
+      final res = await http.post(
+        uri,
+        headers: await _headers(),
+        body: jsonEncode({'lat': lat, 'lng': lng}),
+      );
+      if (res.statusCode == 200) return jsonDecode(res.body)['zone'];
     } catch (e) {
       _log('resolveZone', e);
     }
@@ -112,10 +113,13 @@ class ApiService {
   static Future<List<dynamic>> getShelters(String zoneId) async {
     try {
       final res = await http.get(
-        Uri.parse('$baseUrl/api/v1/zones/$zoneId/shelters'),
+        Uri.parse('$baseUrl/v1/zones/$zoneId'),
         headers: await _headers(),
       );
-      if (res.statusCode == 200) return jsonDecode(res.body);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body)['data'];
+        return data?['shelters'] ?? [];
+      }
     } catch (e) {
       _log('getShelters', e);
     }
