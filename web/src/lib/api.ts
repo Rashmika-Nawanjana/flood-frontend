@@ -186,5 +186,9 @@ export const api = {
       deactivate: (clerkId: string) =>
         mutate<unknown>("DELETE", `/api/admin/users/${clerkId}`),
     },
+    rivers: {
+      list: () => fetcher<{ data: { river_id: number; river_name: string }[] }>("/api/v1/admin/rivers"),
+      create: (data: unknown) => mutate("POST", "/api/v1/admin/rivers", data),
+    },
   },
 };

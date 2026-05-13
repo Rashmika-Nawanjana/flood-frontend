@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import RiskBadge from '@/components/ui/RiskBadge';
@@ -9,11 +9,45 @@ import Modal from '@/components/ui/Modal';
 import { api } from '@/lib/api';
 import type { Zone, ApiResponse } from '@/lib/types';
 import { useZoneStore } from '@/store/useZoneStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import styles from './page.module.css';
 
+type ZoneFormData = {
+  zone_id: string;
+  zone_name: string;
+  description: string;
+  population_at_risk: string;
+  river_id: string;
+  prev_zone_id: string;
+  next_zone_id: string;
+  geometry_json: string;
+};
+
+const initialFormData: ZoneFormData = {
+  zone_id: '',
+  zone_name: '',
+  description: '',
+  population_at_risk: '',
+  river_id: '',
+  prev_zone_id: '',
+  next_zone_id: '',
+  geometry_json: '{"type":"Polygon","coordinates":[[[80.61,7.27],[80.62,7.27],[80.62,7.28],[80.61,7.27]]]}',
+};
+
+type River = {
+  river_id: number;
+  river_name: string;
+};
+
 export default function ZonesPage() {
-  const { zones, selectedZoneId, selectZone } = useZoneStore();
+  const { zones, selectedZoneId, selectZone, addZone } = useZoneStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [showCreate, setShowCreate] = useState(false);
+  const [formData, setFormData] = useState<ZoneFormData>(initialFormData);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rivers, setRivers] = useState<River[]>([]);
+  const [riversError, setRiversError] = useState<string | null>(null);
 
   // Auto-select first zone if none selected
   useEffect(() => {
@@ -22,11 +56,100 @@ export default function ZonesPage() {
     }
   }, [zones, selectedZoneId, selectZone]);
 
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    if (user.role !== 'admin' && user.role !== 'field_officer') return;
+
+    let mounted = true;
+    api.admin.rivers.list()
+      .then((res) => {
+        if (!mounted) return;
+        setRivers(res.data || []);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!mounted) return;
+        setRiversError('Failed to load rivers.');
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, user]);
+
   const selected = zones.find(z => z.zone_id === selectedZoneId) || null;
 
   const highRisk = zones.filter(z => z.risk_level === 'HIGH' || z.risk_level === 'CRITICAL').length;
   const moderate = zones.filter(z => z.risk_level === 'WARNING' || z.risk_level === 'WATCH').length;
   const low = zones.filter(z => z.risk_level === 'LOW').length;
+
+  const closeCreateForm = () => {
+    setShowCreate(false);
+    setFormError(null);
+  };
+
+  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+
+    let geometry: unknown;
+    try {
+      geometry = JSON.parse(formData.geometry_json);
+    } catch {
+      setFormError('Geometry must be valid JSON.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      zone_id: formData.zone_id.trim(),
+      zone_name: formData.zone_name.trim(),
+      geometry,
+      population_at_risk: Number(formData.population_at_risk),
+      description: formData.description.trim(),
+      river_id: Number(formData.river_id),
+      prev_zone_id: formData.prev_zone_id.trim() || null,
+      next_zone_id: formData.next_zone_id.trim() || null,
+    };
+
+    if (!payload.zone_id || !payload.zone_name || !payload.description) {
+      setFormError('Zone ID, name, and description are required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!Number.isFinite(payload.population_at_risk) || payload.population_at_risk < 0) {
+      setFormError('Population at risk must be a valid number.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!Number.isFinite(payload.river_id) || payload.river_id <= 0) {
+      setFormError('River ID must be a valid number.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!payload.geometry || typeof payload.geometry !== 'object') {
+      setFormError('Geometry must be a valid GeoJSON Polygon.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const res = (await api.zones.create(payload)) as ApiResponse<Zone> | Zone;
+      const createdZone = 'data' in res ? res.data : res;
+      addZone(createdZone);
+      selectZone(createdZone.zone_id);
+      setFormData(initialFormData);
+      setShowCreate(false);
+    } catch (e) {
+      console.error(e);
+      setFormError('Failed to create zone. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -125,8 +248,109 @@ export default function ZonesPage() {
         )}
       </div>
 
-      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create New Zone">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Zone creation form — connects to POST /api/v1/admin/zones</p>
+      <Modal isOpen={showCreate} onClose={closeCreateForm} title="Create New Zone" width="640px">
+        <form className={styles.form} onSubmit={handleCreate}>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Zone ID</label>
+              <input
+                className={styles.formInput}
+                placeholder="ZONE-K1"
+                value={formData.zone_id}
+                onChange={(e) => setFormData((p) => ({ ...p, zone_id: e.target.value }))}
+                required
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Zone Name</label>
+              <input
+                className={styles.formInput}
+                placeholder="Getambe Basin"
+                value={formData.zone_name}
+                onChange={(e) => setFormData((p) => ({ ...p, zone_name: e.target.value }))}
+                required
+              />
+            </div>
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Description</label>
+            <input
+              className={styles.formInput}
+              placeholder="Lower Mahaweli region near Peradeniya"
+              value={formData.description}
+              onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
+              required
+            />
+          </div>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Population at Risk</label>
+              <input
+                className={styles.formInput}
+                type="number"
+                min="0"
+                placeholder="20500"
+                value={formData.population_at_risk}
+                onChange={(e) => setFormData((p) => ({ ...p, population_at_risk: e.target.value }))}
+                required
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>River</label>
+              <select
+                className={styles.formSelect}
+                value={formData.river_id}
+                onChange={(e) => setFormData((p) => ({ ...p, river_id: e.target.value }))}
+                required
+              >
+                <option value="">Select River</option>
+                {rivers.map((river) => (
+                  <option key={river.river_id} value={river.river_id}>
+                    {river.river_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Previous Zone ID (optional)</label>
+              <input
+                className={styles.formInput}
+                placeholder="ZONE-M3"
+                value={formData.prev_zone_id}
+                onChange={(e) => setFormData((p) => ({ ...p, prev_zone_id: e.target.value }))}
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>Next Zone ID (optional)</label>
+              <input
+                className={styles.formInput}
+                placeholder="ZONE-X1"
+                value={formData.next_zone_id}
+                onChange={(e) => setFormData((p) => ({ ...p, next_zone_id: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Geometry (GeoJSON)</label>
+            <textarea
+              className={styles.formTextarea}
+              rows={5}
+              value={formData.geometry_json}
+              onChange={(e) => setFormData((p) => ({ ...p, geometry_json: e.target.value }))}
+              required
+            />
+          </div>
+          {riversError && <p className={styles.formError}>{riversError}</p>}
+          {formError && <p className={styles.formError}>{formError}</p>}
+          <div className={styles.formActions}>
+            <button className={styles.cancelBtn} type="button" onClick={closeCreateForm}>Cancel</button>
+            <button className={styles.submitBtn} type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Zone'}
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
