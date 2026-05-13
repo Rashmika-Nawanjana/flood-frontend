@@ -212,7 +212,7 @@ export default function UsersPage() {
                         {u.role.replace('_', ' ')}
                       </span>
                     </td>
-                    <td>{u.zone_id || '—'}</td>
+                    <td>{u.zone_id ? (zones.find(z => z.zone_id === u.zone_id)?.zone_name ?? u.zone_id) : '—'}</td>
                     <td>
                       <span className={`${styles.statusPill} ${u.is_active ? styles.statusActive : styles.statusInactive}`}>
                         {u.is_active ? 'Active' : 'Inactive'}
