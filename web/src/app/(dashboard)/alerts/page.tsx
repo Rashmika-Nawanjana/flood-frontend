@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { FormEvent, useEffect, useState } from 'react';
 import RiskBadge from '@/components/ui/RiskBadge';
 import RoleGate from '@/components/auth/RoleGate';
+import Modal from '@/components/ui/Modal';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
 import type { Alert, ApiResponse } from '@/lib/types';
@@ -14,6 +14,10 @@ export default function AlertsPage() {
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [showResolve, setShowResolve] = useState(false);
+  const [resolutionNote, setResolutionNote] = useState('');
+  const [resolveError, setResolveError] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
 
   const { user, isAuthenticated } = useAuthStore();
 
@@ -32,6 +36,54 @@ export default function AlertsPage() {
     return true;
   });
 
+  const openResolve = () => {
+    setResolveError(null);
+    setResolutionNote('');
+    setShowResolve(true);
+  };
+
+  const closeResolve = () => {
+    setShowResolve(false);
+    setResolveError(null);
+  };
+
+  const handleResolve = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selected) return;
+
+    const note = resolutionNote.trim();
+    if (!note) {
+      setResolveError('Resolution note is required.');
+      return;
+    }
+
+    setIsResolving(true);
+    setResolveError(null);
+    try {
+      const res = await api.admin.alerts.resolve(selected.alert_id, { resolution_note: note });
+      const resolvedAt = (res as any)?.data?.resolved_at || new Date().toISOString();
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.alert_id === selected.alert_id
+            ? { ...a, status: 'RESOLVED', resolved_at: resolvedAt }
+            : a
+        )
+      );
+      setSelected((prev) =>
+        prev && prev.alert_id === selected.alert_id
+          ? { ...prev, status: 'RESOLVED', resolved_at: resolvedAt }
+          : prev
+      );
+      setShowResolve(false);
+      setResolutionNote('');
+    } catch (err) {
+      console.error(err);
+      setResolveError('Failed to resolve alert. Please try again.');
+    } finally {
+      setIsResolving(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -39,9 +91,6 @@ export default function AlertsPage() {
           <h1 className={styles.title}>Alert Management</h1>
           <p className={styles.subtitle}>Monitor and manage emergency alerts across the monitored catchments.</p>
         </div>
-        <RoleGate allowed={['admin']}>
-          <button className={styles.createBtn}><Plus size={16} /> Create Alert</button>
-        </RoleGate>
       </div>
 
       <div className={styles.filters}>
@@ -112,12 +161,42 @@ export default function AlertsPage() {
             </div>
             <RoleGate allowed={['admin']}>
               <div className={styles.detailActions}>
-                <button className={styles.resolveBtn}>Resolve Alert & Close Case</button>
+                <button
+                  className={styles.resolveBtn}
+                  onClick={openResolve}
+                  disabled={selected.status !== 'ACTIVE'}
+                >
+                  Resolve Alert & Close Case
+                </button>
               </div>
             </RoleGate>
           </div>
         )}
       </div>
+
+      <Modal isOpen={showResolve} onClose={closeResolve} title="Resolve Alert" width="520px">
+        <form className={styles.form} onSubmit={handleResolve}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Resolution Note</label>
+            <textarea
+              className={styles.formTextarea}
+              rows={4}
+              placeholder="Technician confirmed evacuation complete."
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              required
+            />
+          </div>
+          {resolveError && <p className={styles.formError}>{resolveError}</p>}
+          <div className={styles.formActions}>
+            <button className={styles.cancelBtn} type="button" onClick={closeResolve}>Cancel</button>
+            <button className={styles.submitBtn} type="submit" disabled={isResolving}>
+              {isResolving ? 'Resolving...' : 'Resolve Alert'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 }

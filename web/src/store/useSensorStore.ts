@@ -6,6 +6,7 @@ interface SensorState {
   sensors: Sensor[];
   selectedSensorId: string | null;
   setSensors: (sensors: Sensor[]) => void;
+  addSensor: (sensor: Sensor) => void;
   updateSensor: (id: string, data: Partial<Sensor>) => void;
   selectSensor: (id: string | null) => void;
 }
@@ -16,6 +17,10 @@ export const useSensorStore = create<SensorState>()(
       sensors: [],
       selectedSensorId: null,
       setSensors: (sensors) => set({ sensors }),
+      addSensor: (sensor) =>
+        set((state) => ({
+          sensors: [sensor, ...state.sensors],
+        })),
       updateSensor: (id, data) =>
         set((state) => ({
           sensors: state.sensors.map((s) =>
