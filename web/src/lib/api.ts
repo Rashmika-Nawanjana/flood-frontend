@@ -22,7 +22,6 @@ async function getAuthToken(): Promise<string | null> {
       }
     ).Clerk;
     if (!clerk?.session) return null;
-    
     const template = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
     return await clerk.session.getToken(template ? { template } : undefined);
   } catch {
