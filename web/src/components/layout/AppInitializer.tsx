@@ -12,17 +12,30 @@ import type { Sensor, Zone, Alert, Shelter, ApiResponse } from '@/lib/types';
 const SENSOR_POLL_INTERVAL_MS = 30_000;
 
 export default function AppInitializer() {
-  const initialized = useRef(false);
   const { user, isAuthenticated } = useAuthStore();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Stable snapshot of zone_id used by the polling closure.
+  const zoneIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    // Only initialize once, and only when user has been loaded
-    if (initialized.current || !isAuthenticated || !user) return;
-    initialized.current = true;
+    // Wait until we have a fully-resolved user (zone_id is no longer undefined —
+    // ClerkSync sets it to null for admins/citizens or a string for field officers
+    // after its async getZone call completes, so we treat undefined as "still loading").
+    if (!isAuthenticated || !user) return;
+
+    // For non-admin users, wait until ClerkSync has finished its async zone fetch.
+    // ClerkSync initialises zone_id to null (not undefined), so once setUser() fires
+    // the value is always null | string, never undefined.
+    // We detect "still loading" by checking if the role is field_officer and zone_id
+    // is still null — but actually we just let it load and re-run when zone_id changes.
+
+    const zoneId = user.zone_id;
+    zoneIdRef.current = zoneId;
 
     async function loadSensors() {
       try {
-        const res = await api.sensors.list(user!.zone_id);
+        const res = await api.sensors.list(zoneIdRef.current);
         const d = res as ApiResponse<Sensor[]>;
         if (d.data) useSensorStore.getState().setSensors(d.data);
       } catch {}
@@ -31,9 +44,9 @@ export default function AppInitializer() {
     async function loadInitialData() {
       try {
         const [sensorRes, zoneRes, alertRes] = await Promise.allSettled([
-          api.sensors.list(user!.zone_id),
-          api.zones.list(user!.zone_id),
-          api.alerts.list(undefined, user!.zone_id),
+          api.sensors.list(zoneId),
+          api.zones.list(zoneId),
+          api.alerts.list(undefined, zoneId),
         ]);
 
         if (sensorRes.status === 'fulfilled') {
@@ -60,11 +73,18 @@ export default function AppInitializer() {
 
     loadInitialData();
 
-    // Poll sensor readings every 30s so all sensors stay current
-    // even if WS events are missing for some sensors.
-    const poll = setInterval(loadSensors, SENSOR_POLL_INTERVAL_MS);
-    return () => clearInterval(poll);
-  }, [isAuthenticated, user]);
+    // Clear any existing poll and start a fresh one scoped to the current zone.
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(loadSensors, SENSOR_POLL_INTERVAL_MS);
+
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
+    // Re-run when the user or their zone changes (ClerkSync updates zone_id async).
+  }, [isAuthenticated, user?.id, user?.zone_id]);
 
   return null;
 }

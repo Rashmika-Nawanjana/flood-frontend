@@ -26,8 +26,8 @@ export function ClerkSync() {
         if (role !== 'admin') {
           try {
             const res = await api.users.getZone(user.id);
-            if (res.data?.zone_id) {
-              zone_id = res.data.zone_id;
+            if (res.zone?.zone_id) {
+              zone_id = res.zone.zone_id;
             }
           } catch (err) {
             console.error('Failed to fetch user zone:', err);

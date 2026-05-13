@@ -85,7 +85,7 @@ async function mutate<T>(
 export const api = {
   users: {
     getZone: (clerkId: string) =>
-      fetcher<{ data: { zone_id: string } }>(`/v1/users/${clerkId}/zone`),
+      fetcher<{ status: string; zone: { zone_id: string } | null }>(`/v1/users/${clerkId}/zone`),
   },
 
   sensors: {
