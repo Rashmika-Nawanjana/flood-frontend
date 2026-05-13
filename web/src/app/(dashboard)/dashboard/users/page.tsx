@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useZoneStore } from '@/store/useZoneStore';
 import RoleGate from '@/components/auth/RoleGate';
 import StatCard from '@/components/ui/StatCard';
 import Modal from '@/components/ui/Modal';
@@ -29,9 +30,12 @@ const PAGE_SIZE = 15;
 export default function UsersPage() {
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
+  const zonesFromStore = useZoneStore((s) => s.zones);
+  const setZonesInStore = useZoneStore((s) => s.setZones);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [zones, setZones] = useState<Zone[]>([]);
+  // zones comes from the global store (loaded by AppInitializer), with a local fallback fetch
+  const zones = zonesFromStore;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,22 +77,18 @@ export default function UsersPage() {
     }
   };
 
-  const fetchZones = async () => {
-    try {
-      const res = await api.zones.list() as any;
-      setZones(res.data || []);
-    } catch (err) {
-      console.error('Failed to fetch zones:', err);
-    }
-  };
-
   useEffect(() => {
     fetchUsers(page);
   }, [page]);
 
+  // Fallback: if AppInitializer hasn't populated zones yet, fetch them directly
   useEffect(() => {
-    fetchZones();
-  }, []);
+    if (zonesFromStore.length > 0) return;
+    api.zones.list().then((res: any) => {
+      const data: Zone[] = res.data || [];
+      if (data.length > 0) setZonesInStore(data);
+    }).catch(() => {});
+  }, [zonesFromStore.length, setZonesInStore]);
 
   // Stats computed from all loaded users on this page
   const stats = useMemo(() => {
