@@ -76,7 +76,16 @@ async function mutate<T>(
     body: data ? JSON.stringify(data) : undefined,
   });
   if (!res.ok) {
-    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    let message = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (typeof body.detail === 'string') {
+        message = body.detail;
+      } else if (Array.isArray(body.detail)) {
+        message = body.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join('; ');
+      }
+    } catch {}
+    throw new Error(message);
   }
   return res.json();
 }
