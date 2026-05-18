@@ -12,7 +12,6 @@ import { useAlertStore } from '@/store/useAlertStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import WaterLevelChart from '@/components/dashboard/WaterLevelChart';
 import ZoneRiskChart from '@/components/dashboard/ZoneRiskChart';
-import FloodProbabilityChart from '@/components/dashboard/FloodProbabilityChart';
 import XaiRiskFactors from '@/components/dashboard/XaiRiskFactors';
 import NextPredictedFlood from '@/components/dashboard/NextPredictedFlood';
 import styles from './page.module.css';
@@ -93,7 +92,7 @@ export default function DashboardPage() {
   ).length;
   const totalPopulation = zones.reduce((sum, z) => sum + (z.population_at_risk || 0), 0);
   const topPrediction = [...predictions].sort(
-    (a, b) => b.flood_probability_percent - a.flood_probability_percent
+    (a, b) => (b.predicted_peak_level_m || 0) - (a.predicted_peak_level_m || 0)
   )[0];
 
   const criticalAlertsCount = alerts.filter(a => a.severity === 'CRITICAL').length;
@@ -120,10 +119,6 @@ export default function DashboardPage() {
     color: zoneColors[level]
   })).filter(d => d.value > 0);
 
-  const probData = predictions.slice(0, 4).map(p => ({
-    zone: p.zone_name,
-    probability: p.flood_probability_percent
-  }));
 
   const nextFloodPred = topPrediction;
   const factors = nextFloodPred?.top_risk_factors || [];
@@ -230,18 +225,15 @@ export default function DashboardPage() {
 
       {/* Row 3 - AI Intelligence */}
       <div className={styles.row3}>
-        <FloodProbabilityChart data={probData} />
         <XaiRiskFactors 
           factors={factors as any} 
           modelVersion={nextFloodPred?.model_version || 'XGB-v1.0'} 
-          confidencePercent={nextFloodPred?.confidence_percent || 87} 
         />
         <NextPredictedFlood 
           zoneName={nextFloodPred?.zone_name || 'No Data'}
           severity={nextFloodPred?.severity || 'LOW'}
           estimatedTime={estimatedTime}
           peakLevel={nextFloodPred?.predicted_peak_level_m || 0}
-          probability={nextFloodPred?.flood_probability_percent || 0}
         />
       </div>
 

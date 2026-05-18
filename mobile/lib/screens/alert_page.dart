@@ -82,24 +82,30 @@ class _AlertsPageState extends State<AlertsPage> {
       return const Center(child: Text("No zone selected"));
     }
 
-    return Column(
-      children: [
-        _buildFilterBar(),
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _alerts.isEmpty
-                  ? _buildEmptyState()
-                  : RefreshIndicator(
-                      onRefresh: _fetchAlerts,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _alerts.length,
-                        itemBuilder: (_, i) => _buildAlertCard(_alerts[i]),
-                      ),
-                    ),
+    return Container(
+      color: Colors.white, // Ensure SafeArea background matches filter bar
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _buildFilterBar(),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _alerts.isEmpty
+                      ? _buildEmptyState()
+                      : RefreshIndicator(
+                          onRefresh: _fetchAlerts,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _alerts.length,
+                            itemBuilder: (_, i) => _buildAlertCard(_alerts[i]),
+                          ),
+                        ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

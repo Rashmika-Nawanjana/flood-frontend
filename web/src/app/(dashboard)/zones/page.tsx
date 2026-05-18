@@ -234,10 +234,6 @@ export default function ZonesPage() {
                 <h3 className={styles.sectionTitle}>Predictive Analysis</h3>
                 <div className={styles.condGrid}>
                   <div className={styles.condItem}>
-                    <span className={styles.condLabel}>Flood Probability</span>
-                    <span className={styles.condValue} style={{ color: 'var(--risk-critical)' }}>{selected.prediction.flood_probability_percent}%</span>
-                  </div>
-                  <div className={styles.condItem}>
                     <span className={styles.condLabel}>Predicted Peak</span>
                     <span className={styles.condValue}>{selected.prediction.predicted_peak_level_m}m</span>
                   </div>

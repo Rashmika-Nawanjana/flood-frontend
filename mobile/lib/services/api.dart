@@ -142,6 +142,28 @@ class ApiService {
     return null;
   }
 
+  // ── Routing ──────────────────────────────────────────────────────────────────
+
+  /// Get driving route between two points using OSRM
+  static Future<List<dynamic>> getRoute(
+      double startLat, double startLng, double endLat, double endLng) async {
+    final url =
+        'https://router.project-osrm.org/route/v1/driving/$startLng,$startLat;$endLng,$endLat?overview=full&geometries=geojson';
+    try {
+      final res = await http.get(Uri.parse(url));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final routes = data['routes'] as List;
+        if (routes.isNotEmpty) {
+          return routes[0]['geometry']['coordinates'] ?? [];
+        }
+      }
+    } catch (e) {
+      _log('getRoute', e);
+    }
+    return [];
+  }
+
   // ── Utilities ─────────────────────────────────────────────────────────────────
   static void _log(String method, Object e) =>
       // ignore: avoid_print

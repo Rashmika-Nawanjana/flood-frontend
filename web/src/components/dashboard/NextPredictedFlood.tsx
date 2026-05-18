@@ -8,10 +8,9 @@ interface NextPredictedFloodProps {
   severity: string;
   estimatedTime: string;
   peakLevel: number;
-  probability: number;
 }
 
-export default function NextPredictedFlood({ zoneName, severity, estimatedTime, peakLevel, probability }: NextPredictedFloodProps) {
+export default function NextPredictedFlood({ zoneName, severity, estimatedTime, peakLevel }: NextPredictedFloodProps) {
   const [timeLeft, setTimeLeft] = useState<string>('');
 
   useEffect(() => {
@@ -64,10 +63,6 @@ export default function NextPredictedFlood({ zoneName, severity, estimatedTime, 
           <div className={styles.statBox}>
             <span className={styles.statLabel}>Peak Level</span>
             <span className={`${styles.statValue} ${peakLevel >= 5.0 ? styles.red : ''}`}>{peakLevel}m</span>
-          </div>
-          <div className={styles.statBox}>
-            <span className={styles.statLabel}>Probability</span>
-            <span className={`${styles.statValue} ${probability >= 80 ? styles.yellow : ''}`}>{probability}%</span>
           </div>
         </div>
 

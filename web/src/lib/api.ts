@@ -7,7 +7,7 @@
 //   /api/...                     → main api (admin, auth, webhooks)
 // =============================================
 
-import type { User } from './types';
+import type { User, ApiResponse, Zone } from './types';
 
 // Use relative paths so Next.js rewrites in next.config.js proxy requests to Kong server-side,
 // avoiding HTTPS→HTTP mixed-content blocks when the frontend is on Vercel (HTTPS).
@@ -115,11 +115,11 @@ export const api = {
       
       const listRes = await fetcher<ApiResponse<Zone[]>>("/v1/zones");
       if (includeShelters && listRes.data) {
-        const detailPromises = listRes.data.map((z) => fetcher<ApiResponse<Zone>>(`/v1/zones/${z.zone_id}`));
+        const detailPromises = listRes.data.map((z: Zone) => fetcher<ApiResponse<Zone>>(`/v1/zones/${z.zone_id}`));
         const details = await Promise.allSettled(detailPromises);
         const fullZones = details
-          .filter((res) => res.status === 'fulfilled')
-          .map((res) => (res as PromiseFulfilledResult<ApiResponse<Zone>>).value.data);
+          .filter((res): res is PromiseFulfilledResult<ApiResponse<Zone>> => res.status === 'fulfilled')
+          .map((res) => res.value.data);
         return { ...listRes, data: fullZones };
       }
       return listRes;

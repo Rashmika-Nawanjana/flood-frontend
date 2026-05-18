@@ -28,6 +28,11 @@ class _MapPageState extends State<MapPage> {
   LatLng? _userPos;
   List _shelters = [];
   List _alerts = [];
+  List<LatLng> _routePoints = [];
+  List<LatLng> _zonePolygon = [];
+  Color _zoneColor = const Color(0xFF1565C0); // Default blue
+  bool _showingRoute = false;
+  bool _calculatingRoute = false;
 
   StreamSubscription<LiveAlert>? _socketSub;
 
@@ -47,7 +52,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _loadData() async {
-    await Future.wait([_loadShelters(), _loadAlerts()]);
+    await Future.wait([_loadShelters(), _loadAlerts(), _loadZonePolygon()]);
   }
 
   Future<void> _loadShelters() async {
@@ -63,6 +68,78 @@ class _MapPageState extends State<MapPage> {
     if (mounted) setState(() => _alerts = data);
   }
 
+  Future<void> _loadZonePolygon() async {
+    if (widget.zoneId == null) return;
+    try {
+      final zone = await ApiService.getZone(widget.zoneId!);
+      if (zone != null) {
+        // Handle color
+        final colorStr = zone['color_code'] as String?;
+        final riskLevel = zone['risk_level'] as String?;
+        final Color zoneColor = _parseColor(colorStr, riskLevel);
+
+        if (zone['geometry'] != null) {
+          final geom = zone['geometry'];
+          if (geom['type'] == 'Polygon' && geom['coordinates'] != null) {
+            final List rings = geom['coordinates'];
+            if (rings.isNotEmpty) {
+              final List outerRing = rings[0];
+              final List<LatLng> points = [];
+              for (final coord in outerRing) {
+                final lat = (coord[1] as num).toDouble();
+                final lng = (coord[0] as num).toDouble();
+
+                if (lat.isFinite && lng.isFinite) {
+                  points.add(LatLng(lat, lng));
+                }
+              }
+
+              if (mounted && points.isNotEmpty) {
+                setState(() {
+                  _zonePolygon = points;
+                  _zoneColor = zoneColor;
+                });
+
+                if (points[0].latitude.isFinite && points[0].longitude.isFinite) {
+                  _mapCtrl.move(points[0], 12);
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error loading zone polygon: $e");
+    }
+  }
+
+  Color _parseColor(String? hex, String? riskLevel) {
+    if (hex != null && hex.isNotEmpty) {
+      try {
+        final buffer = StringBuffer();
+        if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+        buffer.write(hex.replaceFirst('#', ''));
+        return Color(int.parse(buffer.toString(), radix: 16));
+      } catch (_) {}
+    }
+
+    // Fallback based on risk level
+    switch (riskLevel?.toUpperCase()) {
+      case 'CRITICAL':
+      case 'EMERGENCY':
+        return const Color(0xFFC62828);
+      case 'HIGH':
+      case 'WARNING':
+        return const Color(0xFFEF6C00);
+      case 'WATCH':
+        return const Color(0xFFF9A825);
+      case 'LOW':
+        return const Color(0xFF2E7D32);
+      default:
+        return const Color(0xFF1565C0);
+    }
+  }
+
   Future<void> _locateMe() async {
     setState(() => _locating = true);
     try {
@@ -74,9 +151,12 @@ class _MapPageState extends State<MapPage> {
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 8),
       );
-      final ll = LatLng(pos.latitude, pos.longitude);
-      setState(() => _userPos = ll);
-      _mapCtrl.move(ll, 14);
+      
+      if (pos.latitude.isFinite && pos.longitude.isFinite) {
+        final ll = LatLng(pos.latitude, pos.longitude);
+        setState(() => _userPos = ll);
+        _mapCtrl.move(ll, 14);
+      }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +175,7 @@ class _MapPageState extends State<MapPage> {
     return _shelters.map<Marker?>((s) {
       final lat = s['lat'] as double?;
       final lng = s['lng'] as double?;
-      if (lat == null || lng == null) return null;
+      if (lat == null || lng == null || !lat.isFinite || !lng.isFinite) return null;
       return Marker(
         point: LatLng(lat, lng),
         width: 36,
@@ -121,7 +201,7 @@ class _MapPageState extends State<MapPage> {
     return _alerts.map<Marker?>((a) {
       final lat = a['lat'] as double?;
       final lng = a['lng'] as double?;
-      if (lat == null || lng == null) return null;
+      if (lat == null || lng == null || !lat.isFinite || !lng.isFinite) return null;
       return Marker(
         point: LatLng(lat, lng),
         width: 36,
@@ -196,7 +276,10 @@ class _MapPageState extends State<MapPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showRouteToShelter(shelter);
+                },
                 icon: const Icon(Icons.directions, size: 16),
                 label: const Text('Get Directions'),
               ),
@@ -205,6 +288,102 @@ class _MapPageState extends State<MapPage> {
         ),
       ),
     );
+  }
+
+  void _showRouteToShelter(Map shelter) async {
+    final lat = shelter['lat'] as double?;
+    final lng = shelter['lng'] as double?;
+    if (lat == null || lng == null) return;
+
+    if (_userPos == null) {
+      await _locateMe();
+    }
+    if (_userPos == null) return;
+
+    setState(() {
+      _calculatingRoute = true;
+      _showingRoute = true;
+    });
+
+    final coords = await ApiService.getRoute(
+      _userPos!.latitude,
+      _userPos!.longitude,
+      lat,
+      lng,
+    );
+
+    if (mounted) {
+      setState(() {
+        _routePoints = coords
+            .map((c) {
+              final lng = (c[0] as num).toDouble();
+              final lat = (c[1] as num).toDouble();
+              return (lat.isFinite && lng.isFinite) ? LatLng(lat, lng) : null;
+            })
+            .whereType<LatLng>()
+            .toList();
+        _calculatingRoute = false;
+      });
+      if (_routePoints.isNotEmpty) {
+        _mapCtrl.move(_userPos!, 14);
+      }
+    }
+  }
+
+  Future<void> _toggleEvacuationRoute() async {
+    if (_showingRoute) {
+      setState(() {
+        _showingRoute = false;
+        _routePoints = [];
+      });
+      return;
+    }
+
+    if (_userPos == null) {
+      await _locateMe();
+    }
+    if (_userPos == null) return;
+
+    if (_shelters.isEmpty) {
+      await _loadShelters();
+    }
+    if (_shelters.isEmpty) return;
+
+    setState(() {
+      _calculatingRoute = true;
+      _showingRoute = true;
+    });
+
+    // Find closest shelter
+    Map? closest;
+    double minDist = double.infinity;
+
+    for (final s in _shelters) {
+      final lat = s['lat'] as double?;
+      final lng = s['lng'] as double?;
+      if (lat == null || lng == null) continue;
+
+      final dist = Geolocator.distanceBetween(
+        _userPos!.latitude,
+        _userPos!.longitude,
+        lat,
+        lng,
+      );
+
+      if (dist < minDist) {
+        minDist = dist;
+        closest = s;
+      }
+    }
+
+    if (closest != null) {
+      _showRouteToShelter(closest);
+    } else {
+      setState(() {
+        _calculatingRoute = false;
+        _showingRoute = false;
+      });
+    }
   }
 
   Widget _infoRow(IconData icon, String text) => Padding(
@@ -238,6 +417,29 @@ class _MapPageState extends State<MapPage> {
                     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.floodsense.lk',
               ),
+              if (_zonePolygon.isNotEmpty)
+                PolygonLayer(
+                  polygons: <Polygon>[
+                    Polygon(
+                      points: _zonePolygon,
+                      color: _zoneColor.withOpacity(0.15),
+                      borderStrokeWidth: 2,
+                      borderColor: _zoneColor,
+                    ),
+                  ],
+                ),
+              if (_showingRoute && _routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      color: _blue,
+                      strokeWidth: 5,
+                      borderColor: Colors.white,
+                      borderStrokeWidth: 2,
+                    ),
+                  ],
+                ),
               MarkerLayer(
                 markers: [
                   ..._shelterMarkers(),
@@ -270,26 +472,43 @@ class _MapPageState extends State<MapPage> {
             child: Row(
               children: [
                 // Evacuation toggle
-                _MapButton(
-                  icon: _showEvacuation
-                      ? Icons.warning_rounded
-                      : Icons.directions_run,
-                  label: _showEvacuation ? 'Hide Alerts' : 'Show Alerts',
-                  active: _showEvacuation,
-                  activeColor: _red,
-                  onTap: () =>
-                      setState(() => _showEvacuation = !_showEvacuation),
+                Expanded(
+                  child: _MapButton(
+                    icon: _showEvacuation
+                        ? Icons.warning_rounded
+                        : Icons.directions_run,
+                    label: _showEvacuation ? 'Hide Alerts' : 'Show Alerts',
+                    active: _showEvacuation,
+                    activeColor: _red,
+                    onTap: () =>
+                        setState(() => _showEvacuation = !_showEvacuation),
+                  ),
                 ),
                 const SizedBox(width: 8),
 
                 // Shelter toggle
-                _MapButton(
-                  icon: Icons.shield_outlined,
-                  label: _showShelters ? 'Hide Shelters' : 'Shelters',
-                  active: _showShelters,
-                  activeColor: const Color(0xFF2E7D32),
-                  onTap: () =>
-                      setState(() => _showShelters = !_showShelters),
+                Expanded(
+                  child: _MapButton(
+                    icon: Icons.shield_outlined,
+                    label: _showShelters ? 'Hide Shelters' : 'Shelters',
+                    active: _showShelters,
+                    activeColor: const Color(0xFF2E7D32),
+                    onTap: () =>
+                        setState(() => _showShelters = !_showShelters),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Evacuation Route toggle
+                Expanded(
+                  child: _MapButton(
+                    icon: Icons.directions,
+                    label: _showingRoute ? 'Hide Route' : 'Evac Route',
+                    active: _showingRoute,
+                    activeColor: _blue,
+                    loading: _calculatingRoute,
+                    onTap: _toggleEvacuationRoute,
+                  ),
                 ),
               ],
             ),
@@ -366,6 +585,7 @@ class _MapButton extends StatelessWidget {
   final String label;
   final bool active;
   final Color activeColor;
+  final bool loading;
   final VoidCallback onTap;
 
   const _MapButton({
@@ -373,12 +593,13 @@ class _MapButton extends StatelessWidget {
     required this.label,
     required this.active,
     required this.activeColor,
+    this.loading = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
+        onTap: loading ? null : onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding:
@@ -395,18 +616,31 @@ class _MapButton extends StatelessWidget {
             ],
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon,
-                  size: 16,
-                  color: active ? Colors.white : const Color(0xFF374151)),
+              if (loading)
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              else
+                Icon(icon,
+                    size: 16,
+                    color: active ? Colors.white : const Color(0xFF374151)),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: active ? Colors.white : const Color(0xFF374151),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: active ? Colors.white : const Color(0xFF374151),
+                  ),
                 ),
               ),
             ],

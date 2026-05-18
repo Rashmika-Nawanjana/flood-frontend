@@ -54,20 +54,8 @@ export default function PredictionsPage() {
 
               <div className={styles.metrics}>
                 <div className={styles.metric}>
-                  <span className={styles.metricLabel}>Flood Probability</span>
-                  <span className={styles.metricValue} style={{ color: isHighRisk ? 'var(--risk-critical)' : 'var(--risk-warning)' }}>
-                    {pred.flood_probability_percent}%
-                  </span>
-                </div>
-                <div className={styles.metric}>
                   <span className={styles.metricLabel}>Peak Level</span>
                   <span className={styles.metricValue}>{pred.predicted_peak_level_m}m</span>
-                </div>
-                <div className={styles.metric}>
-                  <span className={styles.metricLabel}>Confidence</span>
-                  <span className={styles.metricValue} style={{ color: 'var(--risk-low)' }}>
-                    {pred.confidence_percent}%
-                  </span>
                 </div>
               </div>
 

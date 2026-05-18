@@ -11,10 +11,9 @@ interface RiskFactor {
 interface XaiRiskFactorsProps {
   factors: RiskFactor[];
   modelVersion: string;
-  confidencePercent: number;
 }
 
-export default function XaiRiskFactors({ factors, modelVersion, confidencePercent }: XaiRiskFactorsProps) {
+export default function XaiRiskFactors({ factors, modelVersion }: XaiRiskFactorsProps) {
   const getImpactColor = (impact: string) => {
     switch (impact) {
       case 'High': return 'var(--risk-critical)';
@@ -61,7 +60,6 @@ export default function XaiRiskFactors({ factors, modelVersion, confidencePercen
         
         <div className={styles.xaiFooter}>
           <span className={styles.modelName}>Model: {modelVersion}</span>
-          <span className={styles.confidence}>{confidencePercent}% confidence</span>
         </div>
       </div>
     </div>
