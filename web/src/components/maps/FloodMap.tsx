@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
+// @ts-expect-error - CSS import resolution
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useZoneStore } from '@/store/useZoneStore';
 import { useSensorStore } from '@/store/useSensorStore';
@@ -10,7 +11,9 @@ import { useMapStore } from '@/store/useMapStore';
 import type { Zone, Sensor, Shelter } from '@/lib/types';
 import styles from './FloodMap.module.css';
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+const MAPBOX_TOKEN =
+  process.env.NEXT_PUBLIC_MAPBOX_TOKEN ||
+  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
 
 export type FloodMapMode = 'live-map' | 'evacuation';
 
@@ -117,6 +120,7 @@ export default function FloodMap({ mode = 'live-map' }: FloodMapProps) {
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const iconsLoaded = useRef(false);
 
   // ─── initialise map ─────────────────────────────────────────────────────────
@@ -383,6 +387,193 @@ export default function FloodMap({ mode = 'live-map' }: FloodMapProps) {
     src.setData(sheltersToGeoJSON(shelters));
   }, [mapLoaded, mapError, shelters]);
 
+  // ─── toggle dark/light mode ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mapLoaded || mapError || !map.current) return;
+    const style = isDarkMode ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v11';
+    // Switching style will reset sources/layers/images — reattach after style loads
+    map.current.setStyle(style);
+
+    map.current.once('styledata', () => {
+      // Recreate canvas icons if needed
+      if (!map.current) return;
+      if (!map.current.hasImage('sensor-icon')) {
+        const sc = createSensorCanvas();
+        const sCtx = sc.getContext('2d')!;
+        try {
+          map.current.addImage('sensor-icon', sCtx.getImageData(0, 0, sc.width, sc.height));
+        } catch (err) {
+          // ignore image add errors
+          console.warn('Failed to add sensor icon image after style change', err);
+        }
+      }
+      if (!map.current.hasImage('shelter-icon')) {
+        const shc = createShelterCanvas();
+        const shCtx = shc.getContext('2d')!;
+        try {
+          map.current.addImage('shelter-icon', shCtx.getImageData(0, 0, shc.width, shc.height));
+        } catch (err) {
+          console.warn('Failed to add shelter icon image after style change', err);
+        }
+      }
+
+      // Recreate sources if missing
+      if (!map.current.getSource('zones-source')) {
+        map.current.addSource('zones-source', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      }
+      if (!map.current.getSource('sensors-source')) {
+        map.current.addSource('sensors-source', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      }
+      if (!map.current.getSource('shelters-source')) {
+        map.current.addSource('shelters-source', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      }
+
+      // Recreate layers if missing
+      if (!map.current.getLayer('zones-fill')) {
+        map.current.addLayer({
+          id: 'zones-fill',
+          type: 'fill',
+          source: 'zones-source',
+          paint: { 'fill-color': ['get', 'color_code'], 'fill-opacity': 0.3 },
+        });
+      }
+      if (!map.current.getLayer('zones-border')) {
+        map.current.addLayer({
+          id: 'zones-border',
+          type: 'line',
+          source: 'zones-source',
+          paint: { 'line-color': ['get', 'color_code'], 'line-width': 1, 'line-opacity': 0.5 },
+        });
+      }
+      if (!map.current.getLayer('zones-selected')) {
+        map.current.addLayer({
+          id: 'zones-selected',
+          type: 'line',
+          source: 'zones-source',
+          filter: ['==', ['get', 'zone_id'], ''],
+          paint: { 'line-color': ['get', 'color_code'], 'line-width': 3, 'line-opacity': 0.9 },
+        });
+      }
+      if (!map.current.getLayer('sensors-layer')) {
+        map.current.addLayer({
+          id: 'sensors-layer',
+          type: 'symbol',
+          source: 'sensors-source',
+          layout: {
+            'icon-image': 'sensor-icon',
+            'icon-size': 1.0,
+            'icon-allow-overlap': true,
+            'icon-anchor': 'center',
+            visibility: mode === 'live-map' ? 'visible' : 'none',
+          },
+        });
+      }
+      if (!map.current.getLayer('shelters-layer')) {
+        map.current.addLayer({
+          id: 'shelters-layer',
+          type: 'symbol',
+          source: 'shelters-source',
+          layout: {
+            'icon-image': 'shelter-icon',
+            'icon-size': 1.0,
+            'icon-allow-overlap': true,
+            'icon-anchor': 'center',
+            visibility: mode === 'evacuation' ? 'visible' : 'none',
+          },
+        });
+      }
+
+      // Reattach interactions
+      try {
+        if (map.current.getLayer('zones-fill')) {
+          map.current.off('click', 'zones-fill', () => {});
+          map.current.on('click', 'zones-fill', (e) => {
+            if (!e.features?.length) return;
+            const f = e.features[0];
+            const props = f.properties as any;
+            selectZone(props.zone_id);
+            popup.current!
+              .setLngLat(e.lngLat)
+              .setHTML(
+                `<div class="flood-popup-inner">
+                  <strong>${props.zone_name}</strong>
+                  <div class="flood-popup-row"><span>Risk Level</span><span class="flood-popup-risk">${props.risk_level}</span></div>
+                  <div class="flood-popup-row"><span>Risk Score</span><span>${props.risk_score}</span></div>
+                  <div class="flood-popup-row"><span>Population</span><span>${(props.population_at_risk || 0).toLocaleString()}</span></div>
+                  <div class="flood-popup-row"><span>Trend</span><span>${props.trend}</span></div>
+                </div>`
+              )
+              .addTo(map.current!);
+          });
+        }
+
+        if (map.current.getLayer('sensors-layer')) {
+          map.current.off('click', 'sensors-layer', () => {});
+          map.current.on('click', 'sensors-layer', (e) => {
+            if (!e.features?.length) return;
+            const f = e.features[0];
+            const props = f.properties as any;
+            const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number];
+            popup.current!
+              .setLngLat(coords)
+              .setHTML(
+                `<div class="flood-popup-inner">
+                  <strong>${props.name}</strong>
+                  <div class="flood-popup-row"><span>Status</span><span style="color:${props.online ? '#22C55E' : '#9CA3AF'}">${props.online ? 'Online' : 'Offline'}</span></div>
+                  <div class="flood-popup-row"><span>Water Level</span><span>${Number(props.water_level).toFixed(2)} m</span></div>
+                  <div class="flood-popup-row"><span>Rainfall</span><span>${Number(props.rainfall).toFixed(1)} mm/hr</span></div>
+                </div>`
+              )
+              .addTo(map.current!);
+          });
+        }
+
+        if (map.current.getLayer('shelters-layer')) {
+          map.current.off('click', 'shelters-layer', () => {});
+          map.current.on('click', 'shelters-layer', (e) => {
+            if (!e.features?.length) return;
+            const f = e.features[0];
+            const props = f.properties as any;
+            const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number];
+            const pct = Math.round(((props.current_occupancy || 0) / Math.max(props.capacity, 1)) * 100);
+            const statusColor = props.status === 'FULL' ? '#EF4444' : props.status === 'FILLING' ? '#F97316' : '#22C55E';
+            popup.current!
+              .setLngLat(coords)
+              .setHTML(
+                `<div class="flood-popup-inner">
+                  <strong>${props.name}</strong>
+                  <div class="flood-popup-row"><span>Status</span><span style="color:${statusColor}">${props.status || 'OPEN'}</span></div>
+                  <div class="flood-popup-row"><span>Occupancy</span><span>${props.current_occupancy || 0}/${props.capacity} (${pct}%)</span></div>
+                  <div class="flood-popup-row"><span>Contact</span><span>${props.contact_number}</span></div>
+                </div>`
+              )
+              .addTo(map.current!);
+          });
+        }
+
+        // cursor handling
+        ['zones-fill', 'sensors-layer', 'shelters-layer'].forEach((layerId) => {
+          map.current!.on('mouseenter', layerId, () => { map.current!.getCanvas().style.cursor = 'pointer'; });
+          map.current!.on('mouseleave', layerId, () => { map.current!.getCanvas().style.cursor = ''; });
+        });
+      } catch (err) {
+        console.warn('Failed to reattach map interactions after style change', err);
+      }
+
+      // push current data into sources
+      try {
+        const zonesSrc = map.current.getSource('zones-source') as mapboxgl.GeoJSONSource | undefined;
+        if (zonesSrc) zonesSrc.setData(zonesToGeoJSON(zones));
+        const sensorsSrc = map.current.getSource('sensors-source') as mapboxgl.GeoJSONSource | undefined;
+        if (sensorsSrc) sensorsSrc.setData(sensorsToGeoJSON(sensors));
+        const sheltersSrc = map.current.getSource('shelters-source') as mapboxgl.GeoJSONSource | undefined;
+        if (sheltersSrc) sheltersSrc.setData(sheltersToGeoJSON(shelters));
+      } catch (err) {
+        console.warn('Failed to set source data after style change', err);
+      }
+    });
+  }, [isDarkMode, mapLoaded, mapError, mode, zones, sensors, shelters, selectZone]);
+
   // ─── update zone layer visibility based on mode ──────────────────────────────
   useEffect(() => {
     if (!mapLoaded || mapError || !map.current) return;
@@ -443,6 +634,13 @@ export default function FloodMap({ mode = 'live-map' }: FloodMapProps) {
 
       <div className={styles.mapContainer}>
         <div ref={mapContainer} className={styles.mapCanvas} />
+        <button
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          className={`${styles.modeToggle} ${isDarkMode ? styles.modeToggleDark : styles.modeToggleLight}`}
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDarkMode ? '☀︎' : '⏾'}
+        </button>
         {!mapLoaded && !mapError && (
           <div className={styles.loadingOverlay}>
             <div className={styles.loadingSpinner} />
